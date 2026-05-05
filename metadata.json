@@ -1,0 +1,12 @@
+{
+  "name": "Breakfast in Bed Lisboa",
+  "description": "Premium artisanal Portuguese breakfast delivery service in Lisbon (breakfasinbedlx.com). Luxury boutique experience with 3.50€ delivery fee, simplified 08:00–13:00 serving hours, and Stripe payments.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "Multilingual Support",
+    "Stripe Payments",
+    "Live Cart Calculation"
+  ]
+}

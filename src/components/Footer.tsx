@@ -91,7 +91,7 @@ const Footer: React.FC = () => {
                 ))}
               </div>
               <p className="text-white/30 text-xs italic">
-                {t.areas.hours}
+                {t.areas.hours} • {(t.areas as any).fee}
               </p>
               
               {/* Lisbon Map Outline Decor */}

@@ -25,11 +25,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addItem = (item: MenuItem) => {
     if (!item.isMain && !canAddExtra) {
-      // In a real app we might show a toast here
       alert('Por favor, adicione um menu principal primeiro.');
       return;
     }
-
     setItems(prev => {
       const existing = prev.find(i => i.id === item.id);
       if (existing) {
@@ -45,9 +43,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (existing && existing.quantity > 1) {
         return prev.map(i => i.id === id ? { ...i, quantity: i.quantity - 1 } : i);
       }
-      const newItems = prev.filter(i => i.id !== id);
-      // Logic: if we remove the last main item, we should probably warn or handle extras
-      return newItems;
+      return prev.filter(i => i.id !== id);
     });
   };
 

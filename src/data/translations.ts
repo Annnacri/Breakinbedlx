@@ -11,7 +11,8 @@ export const translations = {
     hero: {
       title: 'Breakfast in Bed',
       subtitle: 'O conforto de um pequeno-almoço artesanal entregue à sua porta.',
-      description: 'Pequeno-almoço e brunch português fresco entregue diretamente no seu alojamento em Lisboa.'
+      description: 'Pequeno-almoço e brunch português fresco entregue diretamente no seu alojamento em Lisboa.',
+      deliveryFeeMessage: 'Taxa única de entrega 3,50€'
     },
     benefits: {
       time: 'Poupe tempo durante a sua viagem',
@@ -38,11 +39,16 @@ export const translations = {
       email: 'Email',
       phone: 'Telefone',
       deliveryFee: 'Taxa de Entrega',
-      pay: 'Pagar com Stripe'
+      pay: 'Pagar com Stripe',
+      back: 'Voltar',
+      next: 'Seguinte',
+      contactInfo: 'Informações de Contacto',
+      orderDetails: 'Detalhes da Encomenda'
     },
     areas: {
       title: 'Zonas de Entrega',
-      hours: 'Horário: 08:00–13:00'
+      hours: 'Horário: 08:00–13:00',
+      fee: 'Taxa fixa: 3,50€'
     },
     promo: {
       title: 'Ofertas Especiais',
@@ -70,7 +76,8 @@ export const translations = {
     hero: {
       title: 'Breakfast in Bed',
       subtitle: 'The comfort of a handcrafted breakfast delivered to your door.',
-      description: 'Fresh Portuguese breakfast and brunch delivered directly to your accommodation in Lisbon.'
+      description: 'Fresh Portuguese breakfast and brunch delivered directly to your accommodation in Lisbon.',
+      deliveryFeeMessage: 'Flat delivery fee €3.50'
     },
     benefits: {
       time: 'Save time during your travel',
@@ -97,11 +104,16 @@ export const translations = {
       email: 'Email',
       phone: 'Phone',
       deliveryFee: 'Delivery Fee',
-      pay: 'Pay via Stripe'
+      pay: 'Pay via Stripe',
+      back: 'Back',
+      next: 'Next',
+      contactInfo: 'Contact Info',
+      orderDetails: 'Order Details'
     },
     areas: {
       title: 'Delivery Areas',
-      hours: 'Hours: 08:00–13:00'
+      hours: 'Hours: 08:00–13:00',
+      fee: 'Flat rate: €3.50'
     },
     promo: {
       title: 'Special Offers',
@@ -129,7 +141,8 @@ export const translations = {
     hero: {
       title: 'Breakfast in Bed',
       subtitle: 'La comodidad de un desayuno artesanal entregado en su puerta.',
-      description: 'Desayuno y brunch portugués fresco entregado directamente en su alojamiento en Lisboa.'
+      description: 'Desayuno y brunch portugués fresco entregado directamente en su alojamiento en Lisboa.',
+      deliveryFeeMessage: 'Tarifa plana de entrega 3,50€'
     },
     benefits: {
       time: 'Ahorre tiempo durante su viaje',
@@ -156,11 +169,16 @@ export const translations = {
       email: 'Email',
       phone: 'Teléfono',
       deliveryFee: 'Gastos de Envío',
-      pay: 'Pagar con Stripe'
+      pay: 'Pagar con Stripe',
+      back: 'Volver',
+      next: 'Siguiente',
+      contactInfo: 'Datos de Contacto',
+      orderDetails: 'Detalles del Pedido'
     },
     areas: {
       title: 'Zonas de Entrega',
-      hours: 'Horario: 08:00–13:00'
+      hours: 'Horario: 08:00–13:00',
+      fee: 'Tarifa fija: 3,50€'
     },
     promo: {
       title: 'Ofertas Especiales',
@@ -188,7 +206,8 @@ export const translations = {
     hero: {
       title: 'Breakfast in Bed',
       subtitle: 'Le confort d\'un petit-déjeuner artisanal livré à votre porte.',
-      description: 'Petit-déjeuner et brunch portugais frais livrés directement dans votre logement à Lisbonne.'
+      description: 'Petit-déjeuner et brunch portugais frais livrés directement dans votre logement à Lisbonne.',
+      deliveryFeeMessage: 'Frais de livraison fixes 3,50€'
     },
     benefits: {
       time: 'Gagnez du temps pendant votre voyage',
@@ -215,11 +234,16 @@ export const translations = {
       email: 'Email',
       phone: 'Téléphone',
       deliveryFee: 'Frais de Livraison',
-      pay: 'Payer via Stripe'
+      pay: 'Payer via Stripe',
+      back: 'Retour',
+      next: 'Suivant',
+      contactInfo: 'Coordonnées',
+      orderDetails: 'Détails de la commande'
     },
     areas: {
       title: 'Zones de livraison',
-      hours: 'Horaires : 08:00–13:00'
+      hours: 'Horaires : 08:00–13:00',
+      fee: 'Tarif fixe : 3,50€'
     },
     promo: {
       title: 'Offres Spéciales',
@@ -247,7 +271,8 @@ export const translations = {
     hero: {
       title: 'Breakfast in Bed',
       subtitle: 'Der Komfort eines handgefertigten Frühstücks an Ihre Tür geliefert.',
-      description: 'Frisches portugiesisches Frühstück und Brunch direkt in Ihre Unterkunft in Lissabon geliefert.'
+      description: 'Frisches portugiesisches Frühstück und Brunch direkt in Ihre Unterkunft in Lissabon geliefert.',
+      deliveryFeeMessage: 'Pauschale Liefergebühr 3,50€'
     },
     benefits: {
       time: 'Sparen Sie Zeit während Ihrer Reise',
@@ -274,11 +299,16 @@ export const translations = {
       email: 'E-Mail',
       phone: 'Telefon',
       deliveryFee: 'Liefergebühr',
-      pay: 'Mit Stripe bezahlen'
+      pay: 'Mit Stripe bezahlen',
+      back: 'Zurück',
+      next: 'Weiter',
+      contactInfo: 'Kontaktdaten',
+      orderDetails: 'Bestelldetails'
     },
     areas: {
       title: 'Liefergebiete',
-      hours: 'Zeiten: 08:00–13:00'
+      hours: 'Zeiten: 08:00–13:00',
+      fee: 'Pauschalbetrag: 3,50€'
     },
     promo: {
       title: 'Sonderangebote',
@@ -306,7 +336,8 @@ export const translations = {
     hero: {
       title: 'Breakfast in Bed',
       subtitle: 'Il comfort di una colazione artigianale consegnata alla tua porta.',
-      description: 'Colazione e brunch portoghesi freschi consegnati direttamente nel tuo alloggio a Lisbona.'
+      description: 'Colazione e brunch portoghesi freschi consegnati direttamente nel tuo alloggio a Lisbona.',
+      deliveryFeeMessage: 'Costo di consegna fisso 3,50€'
     },
     benefits: {
       time: 'Risparmia tempo durante il tuo viaggio',
@@ -333,11 +364,16 @@ export const translations = {
       email: 'Email',
       phone: 'Telefono',
       deliveryFee: 'Spese di Spedizione',
-      pay: 'Paga con Stripe'
+      pay: 'Paga con Stripe',
+      back: 'Indietro',
+      next: 'Avanti',
+      contactInfo: 'Contatti',
+      orderDetails: 'Dettagli Ordine'
     },
     areas: {
       title: 'Zone di Consegna',
-      hours: 'Orari: 08:00–13:00'
+      hours: 'Orari: 08:00–13:00',
+      fee: 'Quota fissa: 3,50€'
     },
     promo: {
       title: 'Offerte Speciali',

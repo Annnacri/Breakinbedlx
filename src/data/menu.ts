@@ -27,7 +27,7 @@ export const menus: MenuItem[] = [
       it: 'Spremuta d\'arancia, torta all\'arancia fatta in casa, quiche ai funghi, croissant farciti con fiocchi di latte e kiwi.'
     },
     price: 9.90,
-    image: 'https://images.unsplash.com/photo-1494859814609-3fbd77c65c2f?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=800',
     isMain: true
   },
   {
@@ -41,15 +41,15 @@ export const menus: MenuItem[] = [
       it: 'Menu Portoghese'
     },
     description: {
-      pt: 'Leite com chocolate, Pão de mistura c/ presunto, pastel de bacalhau, Pastel de nata.',
-      en: 'Chocolate milk, mixed bread with ham, codfish cake, Pastel de nata.',
-      es: 'Leche con chocolate, pan mezclado con jamón, pastel de bacalao, Pastel de nata.',
-      fr: 'Lait au chocolat, pain mixte au jambon, beignet de morue, Pastel de nata.',
-      de: 'Schokomilch, Mischbrot mit Schinken, Stockfischkrokette, Pastel de Nata.',
-      it: 'Latte al cioccolato, pane misto con prosciutto, frittella di baccalà, Pastel de nata.'
+      pt: 'Leite com chocolate, Sumo de laranja, Croissant misto, Torrada, Café e Pastel de nata.',
+      en: 'Chocolate milk, Orange juice, Ham & cheese croissant, Toast, Coffee and Pastel de nata.',
+      es: 'Leche con chocolate, Zumo de naranja, Cruasán mixto, Tostada, Café y Pastel de nata.',
+      fr: 'Lait au chocolat, Jus d\'orange, Croissant mixte, Toast, Café et Pastel de nata.',
+      de: 'Schokomilch, Orangensaft, Schinken-Käse-Croissant, Toast, Kaffee und Pastel de nata.',
+      it: 'Latte al cioccolato, Spremuta d\'arancia, Croissant misto, Toast, Caffè e Pastel de nata.'
     },
     price: 8.90,
-    image: 'https://images.unsplash.com/photo-1590080875515-8a3a8dc2fe0a?auto=format&fit=crop&q=80&w=800',
+    image: '/portuguese-menu.jpg',
     isMain: true
   },
   {

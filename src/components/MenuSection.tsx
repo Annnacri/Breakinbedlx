@@ -106,7 +106,7 @@ const MenuSection: React.FC = () => {
               key={item.id} 
               item={item} 
               quantity={getItemQuantity(item.id)}
-              isLocked={!item.isMain && !hasMainItem}
+              isLocked={false}
               addItem={addItem}
               removeItem={removeItem}
               language={language}

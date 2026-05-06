@@ -69,17 +69,22 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({ isOpen, onClose }) => {
         })
       });
 
-      const { id } = await response.json();
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+
+      const { id } = data;
       const stripe = await stripePromise;
       
       if (stripe) {
-        // @ts-ignore
-        const { error } = await stripe.redirectToCheckout({ sessionId: id });
+        const { error } = await (stripe as any).redirectToCheckout({ sessionId: id });
         if (error) throw new Error(error.message);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Checkout failed. Please try again or contact us.');
+      alert(`Checkout Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -261,13 +266,15 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="flex gap-4 pt-4">
-                  <button onClick={prevStep} className="premium-btn border border-black/10 flex items-center justify-center gap-2"><ChevronLeft className="w-4 h-4" /> Back</button>
+                  <button onClick={prevStep} className="premium-btn border border-black/10 flex items-center justify-center gap-2">
+                    <ChevronLeft className="w-4 h-4" /> {(t.cart as any).back}
+                  </button>
                   <button 
                     disabled={!delivery.date || !delivery.time || !delivery.address}
                     onClick={nextStep} 
                     className="premium-btn premium-btn-primary flex-grow flex items-center justify-center gap-2"
                   >
-                    Contact Info <ChevronRight className="w-4 h-4" />
+                    {(t.cart as any).contactInfo} <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </motion.div>
@@ -281,47 +288,71 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({ isOpen, onClose }) => {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-8"
               >
-                <h2 className="text-3xl">Final Details</h2>
                 <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-brand-dark/40 flex items-center gap-2">
-                      <User className="w-3 h-3" /> {t.cart.name}
-                    </label>
-                    <input 
-                      type="text" 
-                      className="w-full bg-white border border-black/5 rounded-2xl px-4 py-3 focus:ring-1 focus:ring-brand-terracotta outline-none text-sm"
-                      value={customer.name}
-                      onChange={e => setCustomer({...customer, name: e.target.value})}
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-brand-dark/40 flex items-center gap-2">
-                        <Mail className="w-3 h-3" /> {t.cart.email}
-                      </label>
-                      <input 
-                        type="email" 
-                        className="w-full bg-white border border-black/5 rounded-2xl px-4 py-3 focus:ring-1 focus:ring-brand-terracotta outline-none text-sm"
-                        value={customer.email}
-                        onChange={e => setCustomer({...customer, email: e.target.value})}
-                      />
+                  <div>
+                    <h2 className="text-3xl mb-4">{(t.cart as any).contactInfo}</h2>
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-brand-dark/40 flex items-center gap-2">
+                          <User className="w-3 h-3" /> {t.cart.name}
+                        </label>
+                        <input 
+                          type="text" 
+                          className="w-full bg-white border border-black/5 rounded-2xl px-4 py-3 focus:ring-1 focus:ring-brand-terracotta outline-none text-sm"
+                          value={customer.name}
+                          onChange={e => setCustomer({...customer, name: e.target.value})}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] uppercase tracking-widest font-bold text-brand-dark/40 flex items-center gap-2">
+                            <Mail className="w-3 h-3" /> {t.cart.email}
+                          </label>
+                          <input 
+                            type="email" 
+                            className="w-full bg-white border border-black/5 rounded-2xl px-4 py-3 focus:ring-1 focus:ring-brand-terracotta outline-none text-sm"
+                            value={customer.email}
+                            onChange={e => setCustomer({...customer, email: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] uppercase tracking-widest font-bold text-brand-dark/40 flex items-center gap-2">
+                            <Phone className="w-3 h-3" /> {t.cart.phone}
+                          </label>
+                          <input 
+                            type="tel" 
+                            className="w-full bg-white border border-black/5 rounded-2xl px-4 py-3 focus:ring-1 focus:ring-brand-terracotta outline-none text-sm"
+                            value={customer.phone}
+                            onChange={e => setCustomer({...customer, phone: e.target.value})}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-widest font-bold text-brand-dark/40 flex items-center gap-2">
-                        <Phone className="w-3 h-3" /> {t.cart.phone}
-                      </label>
-                      <input 
-                        type="tel" 
-                        className="w-full bg-white border border-black/5 rounded-2xl px-4 py-3 focus:ring-1 focus:ring-brand-terracotta outline-none text-sm"
-                        value={customer.phone}
-                        onChange={e => setCustomer({...customer, phone: e.target.value})}
-                      />
+                  </div>
+
+                  <div className="bg-brand-beige/50 rounded-3xl p-6 space-y-4">
+                    <h3 className="text-[10px] uppercase tracking-widest font-bold text-brand-dark/40 border-b border-black/5 pb-2">{(t.cart as any).orderDetails}</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="block text-[10px] uppercase tracking-widest text-brand-dark/30 mb-1">{t.cart.deliveryDate}</span>
+                        <span className="text-sm font-medium">{delivery.date}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] uppercase tracking-widest text-brand-dark/30 mb-1">{t.cart.deliveryTime}</span>
+                        <span className="text-sm font-medium">{delivery.time}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="block text-[10px] uppercase tracking-widest text-brand-dark/30 mb-1">{t.cart.address}</span>
+                      <span className="text-sm font-medium line-clamp-2">{delivery.address}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex gap-4 pt-4">
-                  <button onClick={prevStep} className="premium-btn border border-black/10 flex items-center justify-center gap-2"><ChevronLeft className="w-4 h-4" /> Back</button>
+                  <button onClick={prevStep} className="premium-btn border border-black/10 flex items-center justify-center gap-2">
+                    <ChevronLeft className="w-4 h-4" /> {(t.cart as any).back}
+                  </button>
                   <button 
                     disabled={loading || !customer.name || !customer.email || !customer.phone}
                     onClick={handleCheckout} 

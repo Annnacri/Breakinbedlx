@@ -6,10 +6,12 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import { CartProvider } from './context/CartContext';
+import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import PromoSection from './components/PromoSection';
 import MenuSection from './components/MenuSection';
+import DeliveryMap from './components/DeliveryMap';
 import Footer from './components/Footer';
 import CheckoutFlow from './components/CheckoutFlow';
 import SuccessScreen from './components/SuccessScreen';
@@ -54,6 +56,7 @@ const AppContent: React.FC = () => {
         <Hero />
         <PromoSection />
         <MenuSection />
+        <DeliveryMap />
         
         {/* About Section */}
         <section id="about" className="py-32 bg-white">
@@ -156,7 +159,9 @@ export default function App() {
   return (
     <LanguageProvider>
       <CartProvider>
-        <AppContent />
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
       </CartProvider>
     </LanguageProvider>
   );

@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingBag, Menu, X, Globe } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { ShoppingBag, Menu, X, Globe, LogIn, LogOut, User } from 'lucide-react';
 import { Language } from '../data/translations';
 
 const Header: React.FC = () => {
   const { t, language, setLanguage } = useLanguage();
   const { items } = useCart();
+  const { user, login, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -71,6 +74,59 @@ const Header: React.FC = () => {
                 <option key={lang.code} value={lang.code}>{lang.label}</option>
               ))}
             </select>
+          </div>
+          
+          <div className="h-4 w-px bg-brand-dark/10 mx-2" />
+
+          {/* User Auth Section */}
+          <div className="relative">
+            {user ? (
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-terracotta/20 hover:border-brand-terracotta transition-colors"
+                >
+                  {user.photos && user.photos[0] ? (
+                    <img src={user.photos[0].value} alt={user.displayName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-full h-full bg-brand-terracotta/10 flex items-center justify-center">
+                      <User className="w-5 h-5 text-brand-terracotta" />
+                    </div>
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {isUserMenuOpen && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-black/5 p-2"
+                    >
+                      <div className="px-3 py-2 border-b border-black/5 mb-1">
+                        <p className="text-[10px] uppercase font-bold tracking-widest text-brand-dark/40 mb-1">Olá,</p>
+                        <p className="text-sm font-bold text-brand-dark truncate">{user.displayName}</p>
+                      </div>
+                      <button 
+                        onClick={() => logout()}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Sair</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <button 
+                onClick={() => login()}
+                className="flex items-center gap-2 px-4 py-2 bg-brand-terracotta/10 text-brand-terracotta hover:bg-brand-terracotta hover:text-white rounded-full text-xs font-bold transition-all uppercase tracking-widest"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Login</span>
+              </button>
+            )}
           </div>
 
           <button className="relative p-2 text-brand-dark hover:text-brand-terracotta transition-colors">
@@ -147,6 +203,41 @@ const Header: React.FC = () => {
                   {lang.label}
                 </button>
               ))}
+            </div>
+
+            <div className="mt-4 w-full">
+              {user ? (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-3 bg-white p-4 rounded-2xl w-full border border-black/5">
+                    {user.photos && user.photos[0] ? (
+                      <img src={user.photos[0].value} alt={user.displayName} className="w-12 h-12 rounded-full" referrerPolicy="no-referrer" />
+                    ) : (
+                      <div className="w-12 h-12 bg-brand-terracotta/10 rounded-full flex items-center justify-center">
+                        <User className="w-6 h-6 text-brand-terracotta" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-xs font-bold text-brand-dark/40 uppercase tracking-widest">Utilizador</p>
+                      <p className="font-serif text-brand-dark">{user.displayName}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => logout()}
+                    className="w-full py-4 text-red-500 font-bold border border-red-500/10 rounded-2xl flex items-center justify-center gap-2"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Sair
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => login()}
+                  className="w-full bg-brand-terracotta text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-lg"
+                >
+                  <LogIn className="w-6 h-6" />
+                  Entrar com Google
+                </button>
+              )}
             </div>
           </motion.div>
         )}

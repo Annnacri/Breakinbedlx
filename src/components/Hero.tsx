@@ -33,6 +33,11 @@ const Hero: React.FC = () => {
             <span className="text-brand-terracotta italic font-normal">Lisboa</span>
           </h1>
 
+          <div className="inline-flex items-center gap-2 bg-brand-sage/10 text-brand-sage px-4 py-2 rounded-2xl mb-8 border border-brand-sage/20">
+            <div className="w-1.5 h-1.5 bg-brand-sage rounded-full animate-pulse" />
+            <span className="text-xs font-bold uppercase tracking-wider">{(t.hero as any).deliveryFeeMessage}</span>
+          </div>
+
           <p className="text-xl md:text-2xl text-brand-dark/60 font-serif leading-relaxed mb-8 max-w-lg">
             {t.hero.subtitle}
           </p>
@@ -66,8 +71,8 @@ const Hero: React.FC = () => {
         >
           <div className="relative aspect-[4/5] rounded-[4rem] overflow-hidden shadow-2xl">
             <img 
-              src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&q=80&w=1200" 
-              alt="Luxury breakfast in bed" 
+              src="https://images.unsplash.com/photo-1459789034005-ba29c5783491?auto=format&fit=crop&q=80&w=1200" 
+              alt="Artisanal breakfast with berries and coffee" 
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
             />

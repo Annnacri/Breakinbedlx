@@ -3,6 +3,9 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import session from 'express-session';
 
 dotenv.config();
 
@@ -13,6 +16,64 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // OAuth Session Configuration
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'breakfast-in-bed-lisboa-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // Passport Google Strategy
+  if (process.env.OAUTH_CLIENT_ID && process.env.OAUTH_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+        clientID: process.env.OAUTH_CLIENT_ID,
+        clientSecret: process.env.OAUTH_CLIENT_SECRET,
+        callbackURL: "/auth/google/callback",
+        proxy: true
+      },
+      (accessToken, refreshToken, profile, done) => {
+        return done(null, profile);
+      }
+    ));
+
+    passport.serializeUser((user: any, done) => {
+      done(null, user);
+    });
+
+    passport.deserializeUser((user: any, done) => {
+      done(null, user);
+    });
+  }
+
+  // Auth Routes
+  app.get('/auth/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+  );
+
+  app.get('/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/login?error=auth_failed' }),
+    (req, res) => {
+      res.redirect('/');
+    }
+  );
+
+  app.get('/api/user', (req, res) => {
+    res.json(req.user || null);
+  });
+
+  app.get('/auth/logout', (req, res) => {
+    req.logout(() => {
+      res.redirect('/');
+    });
+  });
 
   // API Routes
   app.get('/api/health', (req, res) => {
@@ -29,18 +90,27 @@ async function startServer() {
 
       const origin = req.get('origin') || `${req.protocol}://${req.get('host')}`;
       
-      const line_items = items.map((item: any) => ({
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: item.name,
-            images: item.image ? [item.image] : [],
-            description: item.description,
+      const line_items = items.map((item: any) => {
+        const product_data: any = {
+          name: item.name,
+          description: item.description,
+        };
+
+        // Stripe requires absolute URLs for images. 
+        // If it doesn't start with http, it's likely a relative path which Stripe will reject.
+        if (item.image && (item.image.startsWith('http://') || item.image.startsWith('https://'))) {
+          product_data.images = [item.image];
+        }
+
+        return {
+          price_data: {
+            currency: 'eur',
+            product_data,
+            unit_amount: Math.round(item.price * 100),
           },
-          unit_amount: Math.round(item.price * 100),
-        },
-        quantity: item.quantity,
-      }));
+          quantity: item.quantity,
+        };
+      });
 
       if (deliveryFee && deliveryFee > 0) {
         line_items.push({

@@ -134,6 +134,7 @@ async function startServer() {
         cancel_url: `${origin}/cart`,
         customer_email: customer.email,
         metadata: {
+          customerName: customer.name,
           deliveryDate: delivery.date,
           deliveryTime: delivery.time,
           address: delivery.address,

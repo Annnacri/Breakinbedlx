@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
-import { CheckCircle2, Calendar, Clock, MapPin, Package, ChevronRight, Home } from 'lucide-react';
+import { CheckCircle2, Calendar, Clock, MapPin, Package, ChevronRight, Home, Phone } from 'lucide-react';
 
 interface SuccessScreenProps {
   sessionId: string;
@@ -29,6 +29,29 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ sessionId }) => {
       fetchOrderDetails();
     }
   }, [sessionId]);
+
+  const generateWhatsAppLink = () => {
+    if (!order) return '';
+    const metadata = order.metadata || {};
+    const items = order.line_items?.data || [];
+    
+    let message = `*Novo Pedido - Breakfast in Bed Lisboa*\n\n`;
+    message += `*Cliente:* ${metadata.customerName || 'Cliente'}\n`;
+    message += `*Data:* ${metadata.deliveryDate}\n`;
+    message += `*Horário:* ${metadata.deliveryTime}\n`;
+    message += `*Morada:* ${metadata.address}\n`;
+    message += `*Telefone:* ${metadata.phone}\n\n`;
+    message += `*Items:*\n`;
+    
+    items.forEach((item: any) => {
+      message += `- ${item.quantity}x ${item.description}\n`;
+    });
+    
+    message += `\n*Total:* €${(order.amount_total / 100).toFixed(2)}`;
+    
+    const encodedMessage = encodeURIComponent(message);
+    return `https://wa.me/351964423221?text=${encodedMessage}`;
+  };
 
   if (loading) {
     return (
@@ -132,11 +155,21 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({ sessionId }) => {
               </div>
             </div>
 
-            {/* Back Button */}
-            <div className="pt-8 text-center">
+            {/* Actions */}
+            <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a 
+                href={generateWhatsAppLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[#25D366] text-white px-10 py-5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#128C7E] transition-all group scale-100 hover:scale-[1.02] active:scale-95 shadow-xl"
+              >
+                <Phone className="w-4 h-4" />
+                {(t.success as any).whatsappConfirm}
+              </a>
+              
               <a 
                 href="/" 
-                className="inline-flex items-center gap-3 bg-brand-dark text-white px-10 py-5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-dark/95 transition-all group scale-100 hover:scale-[1.02] active:scale-95 shadow-xl"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-brand-dark text-white px-10 py-5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-dark/95 transition-all group scale-100 hover:scale-[1.02] active:scale-95 shadow-xl"
               >
                 <Home className="w-4 h-4" />
                 {t.success.backToHome}

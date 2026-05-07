@@ -95,6 +95,14 @@ export const menus: MenuItem[] = [
     price: 9.90,
     image: 'https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&q=80&w=800',
     isMain: true
+  },
+  {
+    id: 'm5',
+    name: { pt: 'Menu Saudável', en: 'Healthy Menu', es: 'Menú Saludable', fr: 'Menu Santé', de: 'Gesundes Menü', it: 'Menu Salutare' },
+    description: { pt: 'Iogurte com granola, sumo e tosta.', en: 'Yogurt with granola, juice and toast.', es: 'Yogur con granola, zumo y tostada.', fr: 'Yaourt avec granola, jus et toast.', de: 'Joghurt mit Granola, Saft und Toast.', it: 'Yogurt con granola, succo e toast.' },
+    price: 11.50,
+    image: 'https://images.unsplash.com/photo-149485981460c-38cf40d04fd0?auto=format&fit=crop&q=80&w=800',
+    isMain: true
   }
 ];
 
@@ -129,6 +137,14 @@ export const extras: MenuItem[] = [
     description: { pt: 'Salgado premium.', en: 'Premium savory.', es: 'Aperitivo premium.', fr: 'Savoureux premium.', de: 'Premium-Snack.', it: 'Salato premium.' },
     price: 3.90,
     image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800',
+    isMain: false
+  },
+  {
+    id: 'e5',
+    name: { pt: 'Sumo Laranja', en: 'Orange Juice', es: 'Zumo Naranja', fr: 'Jus d\'orange', de: 'Orangensaft', it: 'Spremuta' },
+    description: { pt: 'Fresco e natural.', en: 'Fresh and natural.', es: 'Fresco y natural.', fr: 'Frais et naturel.', de: 'Frisch und natürlich.', it: 'Fresco e naturale.' },
+    price: 2.50,
+    image: 'https://images.unsplash.com/photo-1600271886311-ad8d7142c99f?auto=format&fit=crop&q=80&w=800',
     isMain: false
   }
 ];

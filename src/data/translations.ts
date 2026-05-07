@@ -63,7 +63,8 @@ export const translations = {
       orderNumber: 'Número do Pedido',
       items: 'Artigos',
       subtotal: 'Subtotal',
-      deliveryTime: 'Horário Previsto'
+      deliveryTime: 'Horário Previsto',
+      whatsappConfirm: 'Confirmar no WhatsApp'
     }
   },
   en: {
@@ -128,7 +129,8 @@ export const translations = {
       orderNumber: 'Order Number',
       items: 'Items',
       subtotal: 'Subtotal',
-      deliveryTime: 'Estimated Time'
+      deliveryTime: 'Estimated Time',
+      whatsappConfirm: 'Confirm on WhatsApp'
     }
   },
   es: {
@@ -193,7 +195,8 @@ export const translations = {
       orderNumber: 'Número de Pedido',
       items: 'Artículos',
       subtotal: 'Subtotal',
-      deliveryTime: 'Hora Estimada'
+      deliveryTime: 'Hora Estimada',
+      whatsappConfirm: 'Confirmar por WhatsApp'
     }
   },
   fr: {
@@ -258,7 +261,8 @@ export const translations = {
       orderNumber: 'Numéro de commande',
       items: 'Articles',
       subtotal: 'Sous-total',
-      deliveryTime: 'Heure estimée'
+      deliveryTime: 'Heure estimée',
+      whatsappConfirm: 'Confirmer sur WhatsApp'
     }
   },
   de: {
@@ -323,7 +327,8 @@ export const translations = {
       orderNumber: 'Bestellnummer',
       items: 'Artikel',
       subtotal: 'Zwischensumme',
-      deliveryTime: 'Geschätzte Zeit'
+      deliveryTime: 'Geschätzte Zeit',
+      whatsappConfirm: 'Auf WhatsApp bestätigen'
     }
   },
   it: {
@@ -388,7 +393,8 @@ export const translations = {
       orderNumber: 'Numero Ordine',
       items: 'Articoli',
       subtotal: 'Subtotale',
-      deliveryTime: 'Orario Stimato'
+      deliveryTime: 'Orario Stimato',
+      whatsappConfirm: 'Conferma su WhatsApp'
     }
   }
 };

@@ -11,10 +11,11 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import PromoSection from './components/PromoSection';
 import MenuSection from './components/MenuSection';
-import DeliveryMap from './components/DeliveryMap';
+// import DeliveryMap from './components/DeliveryMap';
 import Footer from './components/Footer';
 import CheckoutFlow from './components/CheckoutFlow';
 import SuccessScreen from './components/SuccessScreen';
+import MusicPlayer from './components/MusicPlayer';
 import { ShoppingBag, ChevronRight } from 'lucide-react';
 import { useCart } from './context/CartContext';
 import { useLanguage } from './context/LanguageContext';
@@ -56,7 +57,7 @@ const AppContent: React.FC = () => {
         <Hero />
         <PromoSection />
         <MenuSection />
-        <DeliveryMap />
+        {/* <DeliveryMap /> */}
         
         {/* About Section */}
         <section id="about" className="py-32 bg-white">
@@ -136,6 +137,8 @@ const AppContent: React.FC = () => {
         isOpen={isCheckoutOpen} 
         onClose={() => setIsCheckoutOpen(false)} 
       />
+      
+      <MusicPlayer />
       
       {/* Desktop Floating Cart Summary Toggle */}
       {!isCheckoutOpen && cartCount > 0 && (

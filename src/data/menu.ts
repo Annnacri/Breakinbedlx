@@ -27,7 +27,7 @@ export const menus: MenuItem[] = [
       it: 'Spremuta d\'arancia, torta all\'arancia fatta in casa, quiche ai funghi, croissant farciti con fiocchi di latte e kiwi.'
     },
     price: 9.90,
-    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&q=80&w=800',
     isMain: true
   },
   {
@@ -41,15 +41,15 @@ export const menus: MenuItem[] = [
       it: 'Menu Portoghese'
     },
     description: {
-      pt: 'Leite com chocolate, Sumo de laranja, Croissant misto, Torrada, Café e Pastel de nata.',
-      en: 'Chocolate milk, Orange juice, Ham & cheese croissant, Toast, Coffee and Pastel de nata.',
-      es: 'Leche con chocolate, Zumo de naranja, Cruasán mixto, Tostada, Café y Pastel de nata.',
-      fr: 'Lait au chocolat, Jus d\'orange, Croissant mixte, Toast, Café et Pastel de nata.',
-      de: 'Schokomilch, Orangensaft, Schinken-Käse-Croissant, Toast, Kaffee und Pastel de nata.',
-      it: 'Latte al cioccolato, Spremuta d\'arancia, Croissant misto, Toast, Caffè e Pastel de nata.'
+      pt: 'Leite com chocolate, Pão de mistura c/ presunto, Pastel de bacalhau e Pastel de nata.',
+      en: 'Chocolate milk, Mixed bread with ham, Codfish fritter and Pastel de nata.',
+      es: 'Leche con chocolate, Pan de mezcla con jamón, Buñuelo de bacalao y Pastel de nata.',
+      fr: 'Lait au chocolat, Pain de campagne au jambon, Beignet de morue et Pastel de nata.',
+      de: 'Schokomilch, Mischbrot mit Schinken, Kabeljau-Krokette und Pastel de nata.',
+      it: 'Latte al cioccolato, Pane misto con prosciutto, Crocchetta di baccalà e Pastel de nata.'
     },
     price: 8.90,
-    image: '/portuguese-menu.jpg',
+    image: '/portuguese_breakfast.png',
     isMain: true
   },
   {
@@ -71,7 +71,7 @@ export const menus: MenuItem[] = [
       it: 'Spremuta d\'arancia, uova strapazzate con farinheira, mini toast, rissol di gamberi, rissol di maialino da latte, paté di sardine, crostata di mele fatta in casa.'
     },
     price: 14.90,
-    image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1513442542250-854d436a73f2?auto=format&fit=crop&q=80&w=800',
     isMain: true
   },
   {
@@ -87,21 +87,13 @@ export const menus: MenuItem[] = [
     description: {
       pt: 'Limonada fresca, Queijo fresco, Tosta de pasta de atum com alface, torta de limão, tarte de pêra e chocolate.',
       en: 'Fresh lemonade, fresh cheese, tuna paste toast with lettuce, lemon roll, pear and chocolate tart.',
-      es: 'Limonada fresca, queso fresco, tostada de pasta de atún con lechuga, torta de limón, tarta de pera y chocolate.',
+      es: 'Limonada fresca, queso fresco, tostada de pasta de de atún con lechuga, torta de limón, tarta de pera y chocolate.',
       fr: 'Limonade fraîche, fromage frais, toast à la mousse de thon et laitue, roulé au citron, tarte poire et chocolat.',
       de: 'Frische Limonade, Frischkäse, Thunfischpasteten-Toast mit Salat, Zitronenrolle, Birnen-Schokoladen-Torte.',
       it: 'Limonata fresca, formaggio fresco, toast con pasta di tonno e lattuga, rotolo al limone, crostata di pere e cioccolato.'
     },
     price: 9.90,
-    image: 'https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&q=80&w=800',
-    isMain: true
-  },
-  {
-    id: 'm5',
-    name: { pt: 'Menu Saudável', en: 'Healthy Menu', es: 'Menú Saludable', fr: 'Menu Santé', de: 'Gesundes Menü', it: 'Menu Salutare' },
-    description: { pt: 'Iogurte com granola, sumo e tosta.', en: 'Yogurt with granola, juice and toast.', es: 'Yogur con granola, zumo y tostada.', fr: 'Yaourt avec granola, jus et toast.', de: 'Joghurt mit Granola, Saft und Toast.', it: 'Yogurt con granola, succo e toast.' },
-    price: 11.50,
-    image: 'https://images.unsplash.com/photo-149485981460c-38cf40d04fd0?auto=format&fit=crop&q=80&w=800',
+    image: '/menu_summer.png',
     isMain: true
   }
 ];
@@ -109,10 +101,10 @@ export const menus: MenuItem[] = [
 export const extras: MenuItem[] = [
   {
     id: 'e1',
-    name: { pt: 'Bifana á Portuguesa', en: 'Portuguese Bifana', es: 'Bifana Portuguesa', fr: 'Bifana Portugaise', de: 'Portugiesische Bifana', it: 'Bifana Portoghese' },
-    description: { pt: 'No pão tradicional.', en: 'In traditional bread.', es: 'En pan tradicional.', fr: 'Dans du pain traditionnel.', de: 'In traditionellem Brot.', it: 'Nel pane tradizionale.' },
+    name: { pt: 'Bifana á Portuguesa, no pão', en: 'Portuguese Bifana in bread', es: 'Bifana Portuguesa en pan', fr: 'Bifana Portugaise dans du pain', de: 'Portugiesische Bifana im Brot', it: 'Bifana Portoghese nel pane' },
+    description: { pt: 'Receita tradicional portuguesa no pão.', en: 'Traditional Portuguese pork sandwich.', es: 'Receta tradicional portuguesa en pan.', fr: 'Recette traditionnelle portugaise dans du pain.', de: 'Traditionelles portugiesisches Schweinefleisch-Sandwich.', it: 'Ricetta tradicional portoghese nel pane.' },
     price: 3.90,
-    image: 'https://images.unsplash.com/photo-1621852004158-f3bc188ace2d?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&q=80&w=800',
     isMain: false
   },
   {
@@ -120,7 +112,7 @@ export const extras: MenuItem[] = [
     name: { pt: 'Prego no pão c/ pickles', en: 'Steak sandwich w/ pickles', es: 'Prego en pan con pepinillos', fr: 'Sandwich de steak aux pickles', de: 'Steak-Sandwich mit Pickles', it: 'Prego nel pane con sottaceti' },
     description: { pt: 'Bife tenro com pickles caseiros.', en: 'Tender steak with homemade pickles.', es: 'Filete tierno con pepinillos caseros.', fr: 'Steak tendre avec des pickles maison.', de: 'Zartes Steak mit hausgemachten Pickles.', it: 'Bistecca tenera con sottaceti fatti in casa.' },
     price: 4.90,
-    image: 'https://images.unsplash.com/photo-1550507992-eb63ffee0847?auto=format&fit=crop&q=80&w=800',
+    image: '/prego_steaksandwich.png',
     isMain: false
   },
   {
@@ -128,23 +120,15 @@ export const extras: MenuItem[] = [
     name: { pt: 'Croquete de vitela', en: 'Veal croquette', es: 'Croqueta de ternera', fr: 'Croquette de veau', de: 'Kalbsskrokette', it: 'Crocchetta di vitello' },
     description: { pt: 'Artesanal e estaladiço.', en: 'Handcrafted and crispy.', es: 'Artesanal y crujiente.', fr: 'Artisanal et croustillant.', de: 'Handwerklich und knusprig.', it: 'Artigianale e croccante.' },
     price: 1.90,
-    image: 'https://images.unsplash.com/photo-1626074353765-517a681e40be?auto=format&fit=crop&q=80&w=800',
+    image: '/veal_croquettes.png',
     isMain: false
   },
   {
     id: 'e4',
     name: { pt: 'Rissol de leitão', en: 'Suckling pig rissol', es: 'Rissol de cochinillo', fr: 'Rissol de cochon de lait', de: 'Spanferkel-Rissol', it: 'Rissol di maialino da latte' },
-    description: { pt: 'Salgado premium.', en: 'Premium savory.', es: 'Aperitivo premium.', fr: 'Savoureux premium.', de: 'Premium-Snack.', it: 'Salato premium.' },
+    description: { pt: 'Salgado artesanal premium.', en: 'Premium handcrafted savory.', es: 'Aperitivo premium artesanal.', fr: 'Savoureux artisanal premium.', de: 'Premium handgemachter Snack.', it: 'Salato artigianale premium.' },
     price: 3.90,
-    image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800',
-    isMain: false
-  },
-  {
-    id: 'e5',
-    name: { pt: 'Sumo Laranja', en: 'Orange Juice', es: 'Zumo Naranja', fr: 'Jus d\'orange', de: 'Orangensaft', it: 'Spremuta' },
-    description: { pt: 'Fresco e natural.', en: 'Fresh and natural.', es: 'Fresco y natural.', fr: 'Frais et naturel.', de: 'Frisch und natürlich.', it: 'Fresco e naturale.' },
-    price: 2.50,
-    image: 'https://images.unsplash.com/photo-1600271886311-ad8d7142c99f?auto=format&fit=crop&q=80&w=800',
+    image: '/suckling_pig_rissol.png',
     isMain: false
   }
 ];

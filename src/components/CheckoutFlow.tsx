@@ -9,7 +9,34 @@ import { loadStripe } from '@stripe/stripe-js';
 // @ts-ignore
 const stripePromise = loadStripe((import.meta as any).env?.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
 
-const DELIVERY_FEE = 3.5;
+const DELIVERY_FEE = 3.90;
+
+const formatTimeSlot = (slot: string, lang: string) => {
+  if (!slot) return '';
+  const [hour, min] = slot.split(':');
+  const h = parseInt(hour, 10);
+  
+  if (lang === 'pt') {
+    const minStr = min === '00' ? '' : min;
+    return `Entrega às ${h}h${minStr}`;
+  }
+  if (lang === 'en') {
+    return `Delivery at ${slot}`;
+  }
+  if (lang === 'es') {
+    return `Entrega a las ${slot}`;
+  }
+  if (lang === 'fr') {
+    return `Livraison à ${h}h${min === '00' ? '00' : min}`;
+  }
+  if (lang === 'de') {
+    return `Lieferung um ${slot}`;
+  }
+  if (lang === 'it') {
+    return `Consegna alle ${slot}`;
+  }
+  return `Entrega às ${h}h${min === '00' ? '' : min}`;
+};
 
 interface CheckoutFlowProps {
   isOpen: boolean;
@@ -18,7 +45,7 @@ interface CheckoutFlowProps {
 
 const CheckoutFlow: React.FC<CheckoutFlowProps> = ({ isOpen, onClose }) => {
   const { t, language } = useLanguage();
-  const { items, total, removeItem, addItem } = useCart();
+  const { items, total, removeItem, addItem, hasMainItem } = useCart();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -64,7 +91,10 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({ isOpen, onClose }) => {
             description: i.description[language]
           })),
           customer,
-          delivery,
+          delivery: {
+            ...delivery,
+            time: formatTimeSlot(delivery.time, language)
+          },
           deliveryFee: DELIVERY_FEE
         })
       });
@@ -183,8 +213,21 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({ isOpen, onClose }) => {
                     ))
                   )}
                 </div>
+                {items.length > 0 && !hasMainItem && (
+                  <div className="p-4 rounded-2xl bg-brand-terracotta/10 border border-brand-terracotta/20 text-brand-terracotta text-sm text-center font-medium">
+                    {t.menu.extrasNote}
+                  </div>
+                )}
                 {items.length > 0 && (
-                  <button onClick={nextStep} className="premium-btn premium-btn-primary w-full flex items-center justify-center gap-2">
+                  <button 
+                    onClick={nextStep} 
+                    disabled={!hasMainItem}
+                    className={`premium-btn w-full flex items-center justify-center gap-2 ${
+                      !hasMainItem 
+                        ? 'bg-brand-dark/5 text-brand-dark/30 border border-brand-dark/10 cursor-not-allowed' 
+                        : 'premium-btn-primary'
+                    }`}
+                  >
                     {t.cart.deliveryInfo} <ChevronRight className="w-4 h-4" />
                   </button>
                 )}
@@ -234,19 +277,19 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({ isOpen, onClose }) => {
                     <label className="text-[10px] uppercase tracking-widest font-bold text-brand-dark/40 flex items-center gap-2 px-1">
                       <Clock className="w-3 h-3" /> {t.cart.deliveryTime}
                     </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {['08:00 - 09:00', '09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '12:00 - 13:00'].map(slot => (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00'].map(slot => (
                         <button
                           key={slot}
                           type="button"
                           onClick={() => setDelivery({...delivery, time: slot})}
-                          className={`px-4 py-3 rounded-2xl text-xs font-bold transition-all border ${
+                          className={`px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all border ${
                             delivery.time === slot 
                               ? 'bg-brand-terracotta text-white border-brand-terracotta' 
                               : 'bg-white text-brand-dark/60 border-black/5 hover:border-brand-terracotta/30'
                           }`}
                         >
-                          {slot}
+                          {formatTimeSlot(slot, language)}
                         </button>
                       ))}
                     </div>
@@ -339,7 +382,7 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({ isOpen, onClose }) => {
                       </div>
                       <div>
                         <span className="block text-[10px] uppercase tracking-widest text-brand-dark/30 mb-1">{t.cart.deliveryTime}</span>
-                        <span className="text-sm font-medium">{delivery.time}</span>
+                        <span className="text-sm font-medium">{formatTimeSlot(delivery.time, language)}</span>
                       </div>
                     </div>
                     <div>

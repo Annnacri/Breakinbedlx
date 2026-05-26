@@ -25,7 +25,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addItem = (item: MenuItem) => {
     if (!item.isMain && !canAddExtra) {
-      alert('Por favor, adicione um menu principal primeiro.');
       return;
     }
     setItems(prev => {

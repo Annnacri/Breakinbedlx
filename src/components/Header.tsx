@@ -13,6 +13,7 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -63,17 +64,57 @@ const Header: React.FC = () => {
           <div className="h-4 w-px bg-brand-dark/10 mx-2" />
 
           {/* Language Switcher */}
-          <div className="flex items-center gap-3">
-            <Globe className="w-4 h-4 text-brand-dark/40" />
-            <select 
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as Language)}
-              className="bg-transparent text-xs font-bold border-none focus:ring-0 cursor-pointer uppercase text-brand-dark"
+          <div className="relative">
+            <button 
+              onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+              className="flex items-center gap-2 hover:text-brand-terracotta transition-colors text-xs font-bold uppercase text-brand-dark focus:outline-none"
             >
-              {languages.map(lang => (
-                <option key={lang.code} value={lang.code}>{lang.label}</option>
-              ))}
-            </select>
+              <Globe className="w-4 h-4 text-brand-dark/40" />
+              <span>{language}</span>
+              <motion.span
+                animate={{ rotate: isLangMenuOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+                className="text-[8px]"
+              >
+                ▼
+              </motion.span>
+            </button>
+
+            <AnimatePresence>
+              {isLangMenuOpen && (
+                <>
+                  {/* Invisible Backdrop to close on click outside */}
+                  <div 
+                    className="fixed inset-0 z-40 bg-transparent cursor-default" 
+                    onClick={() => setIsLangMenuOpen(false)}
+                  />
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                    className="absolute right-0 mt-2 py-2 w-24 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-black/5 z-50 flex flex-col gap-0.5 overflow-hidden"
+                  >
+                    {languages.map(lang => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          setLanguage(lang.code);
+                          setIsLangMenuOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${
+                          language === lang.code 
+                            ? 'bg-brand-terracotta text-white' 
+                            : 'text-brand-dark hover:bg-brand-terracotta/10 hover:text-brand-terracotta'
+                        }`}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
           
           <div className="h-4 w-px bg-brand-dark/10 mx-2" />

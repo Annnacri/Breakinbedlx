@@ -226,7 +226,7 @@ const DeliveryMap: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            delay={0.1}
+            transition={{ delay: 0.1 }}
             className="text-gray-600 max-w-2xl mx-auto"
           >
             Verifique se entregamos no seu alojamento. Operamos num raio de 5km a partir do centro de Lisboa.

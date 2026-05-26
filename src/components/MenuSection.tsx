@@ -15,8 +15,19 @@ const MenuItemCard = ({ item, quantity, isLocked, addItem, removeItem, language,
   addToCartText: string;
   key?: React.Key;
 }) => {
+  const lockLabels: { [key: string]: string } = {
+    pt: 'Apenas com Menu',
+    en: 'With Menu Only',
+    es: 'Solo con Menú',
+    fr: 'Avec Menu',
+    de: 'Nur mit Menü',
+    it: 'Solo con Menu'
+  };
+
+  const currentLockLabel = lockLabels[language] || 'With Menu Only';
+
   return (
-    <div className={`hygge-card p-6 flex flex-col ${isLocked ? 'opacity-80 grayscale-[0.5]' : ''}`}>
+    <div className="hygge-card p-6 flex flex-col">
       <div className="relative aspect-square rounded-2xl overflow-hidden mb-6">
         <img 
           src={item.image} 
@@ -28,10 +39,8 @@ const MenuItemCard = ({ item, quantity, isLocked, addItem, removeItem, language,
           <span className="text-sm font-bold text-brand-dark">€{item.price.toFixed(2)}</span>
         </div>
         {isLocked && (
-          <div className="absolute inset-0 bg-brand-dark/20 backdrop-blur-[2px] flex items-center justify-center">
-            <div className="bg-white/90 p-4 rounded-full shadow-lg">
-              <Lock className="w-6 h-6 text-brand-terracotta" />
-            </div>
+          <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm p-2 rounded-full shadow-sm border border-black/5 flex items-center justify-center">
+            <Lock className="w-3.5 h-3.5 text-brand-terracotta" />
           </div>
         )}
       </div>
@@ -63,13 +72,14 @@ const MenuItemCard = ({ item, quantity, isLocked, addItem, removeItem, language,
           <button 
             onClick={() => addItem(item)}
             disabled={isLocked}
-            className={`w-full py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
+            className={`w-full py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
               isLocked 
                 ? 'bg-brand-dark/5 text-brand-dark/30 border border-brand-dark/10' 
                 : 'bg-brand-terracotta text-white hover:bg-brand-terracotta/90'
             }`}
           >
-            {isLocked ? 'Combo Only' : addToCartText}
+            {isLocked && <Lock className="w-3 h-3 text-brand-dark/20" />}
+            <span>{isLocked ? currentLockLabel : addToCartText}</span>
           </button>
         )}
       </div>
@@ -130,7 +140,7 @@ const MenuSection: React.FC = () => {
                 key={item.id} 
                 item={item} 
                 quantity={getItemQuantity(item.id)}
-                isLocked={!item.isMain && !hasMainItem}
+                isLocked={!hasMainItem}
                 addItem={addItem}
                 removeItem={removeItem}
                 language={language}

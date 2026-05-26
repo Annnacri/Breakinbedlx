@@ -12,7 +12,7 @@ export const translations = {
       title: 'Breakfast in Bed',
       subtitle: 'O conforto de um pequeno-almoço artesanal entregue à sua porta.',
       description: 'Pequeno-almoço e brunch português fresco entregue diretamente no seu alojamento em Lisboa.',
-      deliveryFeeMessage: 'Taxa única de entrega 3,50€'
+      deliveryFeeMessage: 'Taxa única de entrega 3,90€'
     },
     benefits: {
       time: 'Poupe tempo durante a sua viagem',
@@ -48,7 +48,7 @@ export const translations = {
     areas: {
       title: 'Zonas de Entrega',
       hours: 'Horário: 08:00–13:00',
-      fee: 'Taxa fixa: 3,50€'
+      fee: 'Taxa fixa: 3,90€'
     },
     promo: {
       title: 'Ofertas Especiais',
@@ -78,7 +78,7 @@ export const translations = {
       title: 'Breakfast in Bed',
       subtitle: 'The comfort of a handcrafted breakfast delivered to your door.',
       description: 'Fresh Portuguese breakfast and brunch delivered directly to your accommodation in Lisbon.',
-      deliveryFeeMessage: 'Flat delivery fee €3.50'
+      deliveryFeeMessage: 'Flat delivery fee €3.90'
     },
     benefits: {
       time: 'Save time during your travel',
@@ -114,7 +114,7 @@ export const translations = {
     areas: {
       title: 'Delivery Areas',
       hours: 'Hours: 08:00–13:00',
-      fee: 'Flat rate: €3.50'
+      fee: 'Flat rate: €3.90'
     },
     promo: {
       title: 'Special Offers',
@@ -144,7 +144,7 @@ export const translations = {
       title: 'Breakfast in Bed',
       subtitle: 'La comodidad de un desayuno artesanal entregado en su puerta.',
       description: 'Desayuno y brunch portugués fresco entregado directamente en su alojamiento en Lisboa.',
-      deliveryFeeMessage: 'Tarifa plana de entrega 3,50€'
+      deliveryFeeMessage: 'Tarifa plana de entrega 3,90€'
     },
     benefits: {
       time: 'Ahorre tiempo durante su viaje',
@@ -180,7 +180,7 @@ export const translations = {
     areas: {
       title: 'Zonas de Entrega',
       hours: 'Horario: 08:00–13:00',
-      fee: 'Tarifa fija: 3,50€'
+      fee: 'Tarifa fija: 3,90€'
     },
     promo: {
       title: 'Ofertas Especiales',
@@ -210,7 +210,7 @@ export const translations = {
       title: 'Breakfast in Bed',
       subtitle: 'Le confort d\'un petit-déjeuner artisanal livré à votre porte.',
       description: 'Petit-déjeuner et brunch portugais frais livrés directement dans votre logement à Lisbonne.',
-      deliveryFeeMessage: 'Frais de livraison fixes 3,50€'
+      deliveryFeeMessage: 'Frais de livraison fixes 3,90€'
     },
     benefits: {
       time: 'Gagnez du temps pendant votre voyage',
@@ -246,7 +246,7 @@ export const translations = {
     areas: {
       title: 'Zones de livraison',
       hours: 'Horaires : 08:00–13:00',
-      fee: 'Tarif fixe : 3,50€'
+      fee: 'Tarif fixe : 3,90€'
     },
     promo: {
       title: 'Offres Spéciales',
@@ -276,7 +276,7 @@ export const translations = {
       title: 'Breakfast in Bed',
       subtitle: 'Der Komfort eines handgefertigten Frühstücks an Ihre Tür geliefert.',
       description: 'Frisches portugiesisches Frühstück und Brunch direkt in Ihre Unterkunft in Lissabon geliefert.',
-      deliveryFeeMessage: 'Pauschale Liefergebühr 3,50€'
+      deliveryFeeMessage: 'Pauschale Liefergebühr 3,90€'
     },
     benefits: {
       time: 'Sparen Sie Zeit während Ihrer Reise',
@@ -312,7 +312,7 @@ export const translations = {
     areas: {
       title: 'Liefergebiete',
       hours: 'Zeiten: 08:00–13:00',
-      fee: 'Pauschalbetrag: 3,50€'
+      fee: 'Pauschalbetrag: 3,90€'
     },
     promo: {
       title: 'Sonderangebote',
@@ -342,7 +342,7 @@ export const translations = {
       title: 'Breakfast in Bed',
       subtitle: 'Il comfort di una colazione artigianale consegnata alla tua porta.',
       description: 'Colazione e brunch portoghesi freschi consegnati direttamente nel tuo alloggio a Lisbona.',
-      deliveryFeeMessage: 'Costo di consegna fisso 3,50€'
+      deliveryFeeMessage: 'Costo di consegna fisso 3,90€'
     },
     benefits: {
       time: 'Risparmia tempo durante il tuo viaggio',
@@ -378,7 +378,7 @@ export const translations = {
     areas: {
       title: 'Zone di Consegna',
       hours: 'Orari: 08:00–13:00',
-      fee: 'Quota fissa: 3,50€'
+      fee: 'Quota fissa: 3,90€'
     },
     promo: {
       title: 'Offerte Speciali',

@@ -3,10 +3,13 @@ import ReactPlayer from 'react-player';
 import { Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const Player = ReactPlayer as any;
+
 const MusicPlayer: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Play automatically on first user interaction if possible
   useEffect(() => {
@@ -23,17 +26,23 @@ const MusicPlayer: React.FC = () => {
 
   return (
     <div className="fixed bottom-6 left-6 z-[100] group">
-      {/* Hidden Player */}
-      <div className="hidden pointer-events-none">
-        <ReactPlayer
+      {/* Hidden Player but rendering for browsers to initialize */}
+      <div className="absolute w-1 h-1 opacity-0 pointer-events-none overflow-hidden -z-50" style={{ left: '-9999px' }}>
+        <Player
           url="https://www.youtube.com/watch?v=_v2vM4C5P7A"
           playing={isPlaying}
           loop={true}
-          volume={0.3}
+          volume={0.5}
+          playsinline={true}
           config={{
             youtube: {
-              playerVars: { showinfo: 0, controls: 0, modestbranding: 1 }
-            }
+              playerVars: { 
+                showinfo: 0, 
+                controls: 0, 
+                modestbranding: 1,
+                origin: typeof window !== 'undefined' ? window.location.origin : undefined
+              }
+            } as any
           }}
         />
       </div>
@@ -41,12 +50,14 @@ const MusicPlayer: React.FC = () => {
       <div className="relative">
         <motion.button
           id="music-toggle"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
           onClick={(e) => {
             e.stopPropagation();
             setIsPlaying(!isPlaying);
             if (!hasInteracted) setHasInteracted(true);
           }}
-          className={`w-12 h-12 flex items-center justify-center rounded-full shadow-2xl transition-all duration-500 overflow-hidden ${
+          className={`w-12 h-12 flex items-center justify-center rounded-full shadow-2xl transition-all duration-500 overflow-hidden relative z-10 ${
             isPlaying 
               ? 'bg-brand-terracotta text-white' 
               : 'bg-white text-brand-dark'
@@ -95,6 +106,41 @@ const MusicPlayer: React.FC = () => {
             </>
           )}
         </motion.button>
+
+        {/* Hover ring animation */}
+        <AnimatePresence>
+          {isHovered && (
+            <>
+              <motion.div
+                className={`absolute inset-0 rounded-full pointer-events-none -z-10 border-2 ${
+                  isPlaying ? 'border-brand-terracotta/40' : 'border-brand-dark/20'
+                }`}
+                initial={{ scale: 1, opacity: 0 }}
+                animate={{ scale: [1, 1.4], opacity: [0.8, 0] }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  ease: "easeOut"
+                }}
+              />
+              <motion.div
+                className={`absolute inset-0 rounded-full pointer-events-none -z-10 border-2 ${
+                  isPlaying ? 'border-brand-terracotta/20' : 'border-brand-dark/10'
+                }`}
+                initial={{ scale: 1, opacity: 0 }}
+                animate={{ scale: [1, 1.8], opacity: [0.5, 0] }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  ease: "easeOut",
+                  delay: 0.3
+                }}
+              />
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Status tooltip */}
         <div 

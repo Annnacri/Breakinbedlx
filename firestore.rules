@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidBooking(booking) {
+      return booking.clientName is string && booking.clientName.size() <= 100
+          && booking.clientEmail is string && booking.clientEmail.size() <= 100
+          && booking.clientPhone is string && booking.clientPhone.size() <= 50
+          && booking.airbnbAddress is string && booking.airbnbAddress.size() <= 300
+          && booking.deliveryDate is string && booking.deliveryDate.size() <= 20
+          && booking.deliveryTime is string && booking.deliveryTime.size() <= 20
+          && booking.deliveryNotes is string && booking.deliveryNotes.size() <= 1000
+          && booking.totalPrice is number && booking.totalPrice >= 0
+          && booking.status is string && (booking.status == 'pending' || booking.status == 'confirmed' || booking.status == 'cancelled')
+          && booking.createdAt is string;
+    }
+
+    match /bookings/{bookingId} {
+      allow create: if isValidId(bookingId) && isValidBooking(incoming());
+      allow get: if isValidId(bookingId);
+      allow update: if isValidId(bookingId) && isValidBooking(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+      );
+    }
+  }
+}

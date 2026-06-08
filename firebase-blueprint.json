@@ -1,0 +1,30 @@
+{
+  "entities": {
+    "booking": {
+      "title": "Booking",
+      "description": "A breakfast in bed delivery reservation request in Lisbon",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientEmail": { "type": "string", "format": "email" },
+        "clientPhone": { "type": "string" },
+        "airbnbAddress": { "type": "string" },
+        "deliveryDate": { "type": "string" },
+        "deliveryTime": { "type": "string" },
+        "deliveryNotes": { "type": "string" },
+        "items": { "type": "array" },
+        "totalPrice": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["clientName", "clientEmail", "clientPhone", "airbnbAddress", "deliveryDate", "deliveryTime", "items", "totalPrice", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/bookings/{bookingId}": {
+      "schema": "booking",
+      "description": "Store custom booking entries submitted by the users"
+    }
+  }
+}

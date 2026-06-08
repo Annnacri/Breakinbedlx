@@ -1,6 +1,6 @@
 {
-  "name": "Guia de Redirecionamento Cloudflare",
-  "description": "Um guia interativo e ferramenta para configurar regras de redirecionamento no Cloudflare (como WWW para raiz).",
+  "name": "Breakfast in Bed Lisbon",
+  "description": "Premium breakfast delivery reservation experience for Airbnbs in Lisbon.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

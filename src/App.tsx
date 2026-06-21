@@ -1,20 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
-  Coffee, 
   ShoppingBag, 
-  Calendar, 
-  Clock, 
-  MapPin, 
   Sparkles, 
-  Check, 
   Plus, 
   Minus, 
-  X, 
-  Trash2, 
-  Phone, 
-  Mail, 
-  User, 
-  Utensils
+  X
 } from 'lucide-react';
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
@@ -370,6 +360,7 @@ export default function App() {
             </div>
           </div>
         </div>
+      
       )}
     </div>
   );

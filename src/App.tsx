@@ -1,25 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
-  Coffee, 
   ShoppingBag, 
-  Calendar, 
-  Clock, 
-  MapPin, 
   Sparkles, 
-  Check, 
   Plus, 
   Minus, 
-  X, 
-  Trash2, 
-  Phone, 
-  Mail, 
-  User, 
-  Utensils
+  X
 } from 'lucide-react';
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
-// DICIONÁRIO DE LINKS DE PAGAMENTO REAIS DO STRIPE
+// MAPEAMENTO DOS LINKS DE PAGAMENTO DO STRIPE
 const STRIPE_PAYMENT_LINKS: Record<string, string> = {
   'rissol-leitao': 'https://buy.stripe.com/9B63cw2eybqibrB7dG5gc0a',
   'croquete-vitela': 'https://buy.stripe.com/eVq6oIf1k3XQanxeG85gc0b',
@@ -64,7 +54,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // OS TEUS 8 PRODUTOS REAIS AJUSTADOS COM OS PREÇOS DO STRIPE
+  // OS TEUS 8 PRODUTOS REAIS PRESERVADOS
   const menuItems: MenuItem[] = [
     {
       id: 'rissol-leitao',
@@ -201,23 +191,25 @@ export default function App() {
     };
 
     try {
-      // 1. Grava a reserva no Firebase
+      // 1. Grava os dados da reserva no Firebase Firestore de forma imediata
       await addDoc(collection(db, 'bookings'), bookingData);
 
-      // 2. Encaminha para o Link do Stripe correspondente ao item selecionado
+      // 2. Encaminha o cliente para o link de pagamento correspondente
       const selectedItemId = cart[0]?.menuItem.id;
       const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
 
       if (stripeCheckoutUrl) {
         setCart([]);
         setIsCartOpen(false);
-        window.location.href = stripeCheckoutUrl;
+        // Preenche o e-mail do cliente automaticamente para otimizar o checkout no Stripe
+        window.location.href = `${stripeCheckoutUrl}?prefilled_email=${encodeURIComponent(clientEmail)}`;
       } else {
-        alert(lang === 'pt' ? 'Redirecionando para o pagamento...' : 'Redirecting to payment...');
+        // Redirecionamento genérico de segurança caso falte algum ID
+        window.location.href = 'https://buy.stripe.com/9B63cw2eybqibrB7dG5gc0a';
       }
       
-    } catch (err) {
-      setSubmitError(lang === 'pt' ? 'Erro ao conectar à base de dados.' : 'Error connecting to database.');
+    } catch (err: any) {
+      setSubmitError(lang === 'pt' ? 'Erro ao processar o seu pedido. Tente novamente.' : 'Error processing your order. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -374,3 +366,4 @@ export default function App() {
     </div>
   );
 }
+    

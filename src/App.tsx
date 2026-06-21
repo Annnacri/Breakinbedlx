@@ -1,25 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
-  Coffee, 
   ShoppingBag, 
-  Calendar, 
-  Clock, 
-  MapPin, 
   Sparkles, 
-  Check, 
   Plus, 
   Minus, 
-  X, 
-  Trash2, 
-  Phone, 
-  Mail, 
-  User, 
-  Utensils
+  X
 } from 'lucide-react';
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { loadStripe } from '@stripe/stripe-js';
 
-// DICIONÁRIO DE LINKS DE PAGAMENTO REAIS DO STRIPE
+// Inicialização segura do SDK do Stripe com a variável de ambiente do Vite
+// Esta chave será injetada pela Vercel em runtime
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+
+// MAPEAMENTO DOS LINKS DE PAGAMENTO DO STRIPE
 const STRIPE_PAYMENT_LINKS: Record<string, string> = {
   'rissol-leitao': 'https://buy.stripe.com/9B63cw2eybqibrB7dG5gc0a',
   'croquete-vitela': 'https://buy.stripe.com/eVq6oIf1k3XQanxeG85gc0b',
@@ -64,7 +59,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // OS TEUS 8 PRODUTOS REAIS AJUSTADOS COM OS PREÇOS DO STRIPE
+  // OS TEUS 8 PRODUTOS REAIS PRESERVADOS
   const menuItems: MenuItem[] = [
     {
       id: 'rissol-leitao',
@@ -174,6 +169,7 @@ export default function App() {
     return cart.reduce((acc, current) => acc + (current.menuItem.price * current.quantity), 0);
   };
 
+  // PIPELINE DE CHECKOUT AVANÇADO COM VALIDAÇÃO DO STRIPE
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
@@ -201,23 +197,34 @@ export default function App() {
     };
 
     try {
-      // 1. Grava a reserva no Firebase
+      // 1. Validação de segurança: Inicializa a instância do Stripe vinda do SDK
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error(
+          lang === 'pt' 
+            ? 'Chave de configuração do Stripe em falta na Vercel (VITE_STRIPE_PUBLISHABLE_KEY).' 
+            : 'Stripe gateway initialization failed. Missing VITE_STRIPE_PUBLISHABLE_KEY.'
+        );
+      }
+
+      // 2. Grava os dados da reserva no Firebase Firestore
       await addDoc(collection(db, 'bookings'), bookingData);
 
-      // 2. Encaminha para o Link do Stripe correspondente ao item selecionado
+      // 3. Encaminha o cliente para o gateway seguro correspondente ao produto
       const selectedItemId = cart[0]?.menuItem.id;
       const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
 
       if (stripeCheckoutUrl) {
         setCart([]);
         setIsCartOpen(false);
-        window.location.href = stripeCheckoutUrl;
+        // Preenche o e-mail do cliente automaticamente para otimizar o checkout
+        window.location.href = `${stripeCheckoutUrl}?prefilled_email=${encodeURIComponent(clientEmail)}`;
       } else {
-        alert(lang === 'pt' ? 'Redirecionando para o pagamento...' : 'Redirecting to payment...');
+        throw new Error('Erro no mapeamento do ID do produto.');
       }
       
-    } catch (err) {
-      setSubmitError(lang === 'pt' ? 'Erro ao conectar à base de dados.' : 'Error connecting to database.');
+    } catch (err: any) {
+      setSubmitError(err.message || (lang === 'pt' ? 'Erro ao processar o pagamento.' : 'Error processing checkout.'));
     } finally {
       setIsSubmitting(false);
     }

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+  import { useState, useEffect } from 'react';
 import { 
   Coffee, 
   ShoppingBag, 
@@ -14,61 +15,31 @@ import {
   Phone, 
   Mail, 
   User, 
-  Heart, 
-  Info,
-  Gift,
-  HelpCircle
+  Utensils
 } from 'lucide-react';
 import { db } from './firebase';
-import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 
-// Mapeamento dos Price IDs do Stripe guardados na Vercel
-const STRIPE_PRICE_IDS: Record<string, string> = {
-  'pack-classico': import.meta.env.VITE_STRIPE_PRICE_BRUNCH || '', // Associa ao preço do Brunch configurado
-  'pack-saudavel': import.meta.env.VITE_STRIPE_PRICE_VITAMINAC || '', // Associa ao preço da Vitamina C
-  'pack-premium': import.meta.env.VITE_STRIPE_PRICE_SUMMER || '', // Associa ao preço Premium/Summer
+// DICIONÁRIO DE LINKS DE PAGAMENTO REAIS DO STRIPE
+const STRIPE_PAYMENT_LINKS: Record<string, string> = {
+  'rissol-leitao': 'https://buy.stripe.com/9B63cw2eybqibrB7dG5gc0a',
+  'croquete-vitela': 'https://buy.stripe.com/eVq6oIf1k3XQanxeG85gc0b',
+  'prego-pao': 'https://buy.stripe.com/8x214odXgbqi53deG85gc0c',
+  'bifana-portuguesa': 'https://buy.stripe.com/00w3cw7yS51U7bldC45gc0d',
+  'menu-summer': 'https://buy.stripe.com/00w7sM4mGameeDN1Tm5gc0e',
+  'menu-brunch': 'https://buy.stripe.com/00wcN62eydyqcvF9lO5gc0f',
+  'menu-portugues': 'https://buy.stripe.com/aFa4gA6uOcum67hcy05gc0j',
+  'menu-vitamina-c': 'https://buy.stripe.com/bJeaEY1audyq7bl0Pi5gc0l',
 };
-
-enum OperationType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  LIST = 'list',
-  GET = 'get',
-  WRITE = 'write',
-}
-
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: {
-    userId?: string | null;
-    email?: string | null;
-  }
-}
-
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: { userId: null, email: null },
-    operationType,
-    path
-  };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
-}
 
 interface MenuItem {
   id: string;
   title: string;
   titleEn: string;
-  category: 'classicos' | 'saudaveis' | 'premium';
+  category: 'snacks' | 'menus';
   price: number;
   description: string;
   descriptionEn: string;
-  items: string[];
-  itemsEn: string[];
   image: string;
 }
 
@@ -77,33 +48,11 @@ interface CartItem {
   quantity: number;
 }
 
-interface BookingItem {
-  id: string;
-  title: string;
-  quantity: number;
-  price: number;
-}
-
-interface Booking {
-  id: string;
-  clientName: string;
-  clientEmail: string;
-  clientPhone: string;
-  airbnbAddress: string;
-  deliveryDate: string;
-  deliveryTime: string;
-  deliveryNotes: string;
-  items: BookingItem[];
-  totalPrice: number;
-  status: string;
-  createdAt: string;
-}
-
 export default function App() {
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<'all' | 'classicos' | 'saudaveis' | 'premium'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'snacks' | 'menus'>('all');
   
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
@@ -115,116 +64,88 @@ export default function App() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
-  
-  const [localBookingId, setLocalBookingId] = useState<string | null>(null);
-  const [trackedBooking, setTrackedBooking] = useState<Booking | null>(null);
-  const [trackSearchId, setTrackSearchId] = useState('');
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
 
-  useEffect(() => {
-    const savedId = localStorage.getItem('bib_booking_id');
-    if (savedId) {
-      setLocalBookingId(savedId);
-      loadBookingDetails(savedId);
-    }
-  }, []);
-
-  const loadBookingDetails = async (id: string) => {
-    setIsSearching(true);
-    setSearchError(null);
-    try {
-      const docRef = doc(db, 'bookings', id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setTrackedBooking({ id: docSnap.id, ...docSnap.data() } as Booking);
-      } else {
-        setSearchError(lang === 'pt' ? 'Reserva não encontrada.' : 'Reservation not found.');
-      }
-    } catch (err) {
-      setSearchError(lang === 'pt' ? 'Erro ao carregar detalhes da reserva.' : 'Error loading reservation details.');
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
+  // OS TEUS 8 PRODUTOS REAIS AJUSTADOS COM OS PREÇOS DO STRIPE
   const menuItems: MenuItem[] = [
     {
-      id: 'pack-classico',
-      title: 'Pack Lisboa Antiga',
-      titleEn: 'Classic Lisbon Pack',
-      category: 'classicos',
-      price: 21.90,
-      description: 'O sabor autêntico das manhãs lisboetas com pastéis de nata estaladiços preparados no próprio dia.',
-      descriptionEn: 'The authentic flavor of Lisbon mornings with crispy pastéis de nata prepared fresh on the day.',
-      items: [
-        '2 Croissants doirados folhados de manteiga',
-        '2 Pastéis de Nata originais polvilhados de canela',
-        'Tábua mista de queijo Flamengo e fiambre da Pecharia',
-        'Sumo natural de laranjas biológicas do Algarve (330ml)',
-        'Café de filtro artesanal de lote selecionado'
-      ],
-      itemsEn: [
-        '2 Golden flaky butter croissants',
-        '2 Original Pastéis de Nata sprinkled with cinnamon',
-        'Mixed platter of Flamengo cheese and cured ham',
-        'Fresh natural organic Algarve orange juice (330ml)',
-        'Artesanal select-batch filter coffee'
-      ],
+      id: 'rissol-leitao',
+      title: 'Rissol de Leitão',
+      titleEn: 'Suckling Pig Rissol',
+      category: 'snacks',
+      price: 3.90,
+      description: 'Salgado tradicional crocante com recheio cremoso e intenso de leitão assado.',
+      descriptionEn: 'Traditional crispy savory pastry with a creamy and intense roasted suckling pig filling.',
+      image: 'https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'croquete-vitela',
+      title: 'Croquete de Vitela',
+      titleEn: 'Veal Croquette',
+      category: 'snacks',
+      price: 1.90,
+      description: 'Croquete artesanal feito com carne de vitela selecionada e frito na perfeição.',
+      descriptionEn: 'Artisanal croquette made with selected veal meat and fried to golden perfection.',
+      image: 'https://images.unsplash.com/photo-1626132647523-66f5bf380027?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'prego-pao',
+      title: 'Prego no Pão c/ Picles',
+      titleEn: 'Prego Steak Sandwich with Pickles',
+      category: 'snacks',
+      price: 4.90,
+      description: 'Prego de carne tenra em pão tipicamente português, acompanhado com picles estaladiços.',
+      descriptionEn: 'Tender beef steak sandwich in traditional Portuguese bread, served with crunchy pickles.',
+      image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'bifana-portuguesa',
+      title: 'Bifana à Portuguesa no Pão',
+      titleEn: 'Portuguese Bifana Pork Sandwich',
+      category: 'snacks',
+      price: 3.90,
+      description: 'A clássica bifana de porco marinada em vinagre, alho e especiarias, servida quente no pão.',
+      descriptionEn: 'The classic Portuguese pork sandwich marinated in garlic, wine, and spices, served hot.',
       image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80'
     },
     {
-      id: 'pack-saudavel',
-      title: 'Pack Alfama Green',
-      titleEn: 'Alfama Green Healthy Pack',
-      category: 'saudaveis',
-      price: 24.50,
-      description: 'Uma opção energizante, nutritiva e fresca perfeita para começar um longo dia a subir as colinas de Lisboa.',
-      descriptionEn: 'An energizing, nutritious and fresh option perfect for starting a long day climbing the hills of Lisbon.',
-      items: [
-        'Pão rústico de centeio fatiado de fermentação lenta',
-        'Abacate da Madeira fatiado com sementes de sésamo',
-        'Iogurte grego artesanal com mel e granola biológica',
-        'Fruta fresca cortada da época (morangos, kiwi, manga)',
-        'Sumo verde Detox revigorante prensa a frio',
-        'Infusão fresca de menta e limão de horta local'
-      ],
-      itemsEn: [
-        'Rustic sliced slow-fermented rye bread',
-        'Sliced Madeiran avocado with sesame seeds',
-        'Artesanal greek yogurt with local honey and organic granola',
-        'Fresh seasonal cut fruit (strawberries, kiwi, manga)',
-        'Invigorating cold-pressed green detox juice',
-        'Fresh mint and lemon herbal infusion from a local garden'
-      ],
+      id: 'menu-summer',
+      title: 'Menu Verão',
+      titleEn: 'Summer Menu',
+      category: 'menus',
+      price: 9.90,
+      description: 'Opção leve e refrescante ideal para as manhãs quentes e radiantes de Lisboa.',
+      descriptionEn: 'A light and refreshing option ideal for Lisbon’s warm and radiant mornings.',
       image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=600&auto=format&fit=crop&q=80'
     },
     {
-      id: 'pack-premium',
-      title: 'Pack Tejo Golden Experience',
-      titleEn: 'Golden Tejo Experience Pack',
-      category: 'premium',
-      price: 49.00,
-      description: 'A nossa melhor experiência gastronómica. Celebre um aniversário ou uma manhã mágica no seu ninho lisboeta.',
-      descriptionEn: 'Our ultimate gastronomic experience. Celebrate a birthday or a magical morning in your Lisbon nest.',
-      items: [
-        'Panquecas fofas com mel biológico de urze e bagas vermelhas',
-        'Ovos mexidos super cremosos salpicados com cebolinho fresco',
-        'Tábua de Queijos Portugueses premium (Queijo da Serra & Azeitão)',
-        'Morangos frescos mergulhados em chocolate negro',
-        'Garrafa fresca de Espumante Bruto Português (375ml) com flute',
-        'Duas Mimosas de Laranja do Algarve preparadas na hora'
-      ],
-      itemsEn: [
-        'Fluffy pancakes with heather honey and red berries',
-        'Super creamy scrambled eggs with fresh chives',
-        'Premium Portuguese cheese board (Serra & Azeitão cheeses)',
-        'Fresh local strawberries dipped in dark chocolate',
-        'Chilled bottle of Portuguese Brut Sparkling Wine (375ml) with flutes',
-        'Two freshly made Algarve Orange Mimosas'
-      ],
+      id: 'menu-brunch',
+      title: 'Menu Brunch',
+      titleEn: 'Brunch Menu',
+      category: 'menus',
+      price: 14.90,
+      description: 'Um brunch completo e reforçado com uma excelente seleção para o teu meio-dia.',
+      descriptionEn: 'A complete and hearty brunch featuring an excellent selection for your midday experience.',
       image: 'https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'menu-portugues',
+      title: 'Menu Português',
+      titleEn: 'Portuguese Menu',
+      category: 'menus',
+      price: 8.90,
+      description: 'A simbiose perfeita dos sabores tradicionais portugueses num pequeno-almoço autêntico.',
+      descriptionEn: 'The perfect symbiosis of traditional Portuguese flavors in an authentic breakfast.',
+      image: 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'menu-vitamina-c',
+      title: 'Menu Vitamina C',
+      titleEn: 'Vitamin C Menu',
+      category: 'menus',
+      price: 9.90,
+      description: 'Uma opção energética, sumarenta e fresca rica em vitamina C, perfeita para começar o dia.',
+      descriptionEn: 'An energizing, juicy, and fresh choice packed with vitamin C, perfect to kickstart your day.',
+      image: 'https://images.unsplash.com/photo-1621510456681-23a23cfb5f57?w=600&auto=format&fit=crop&q=80'
     }
   ];
 
@@ -254,13 +175,9 @@ export default function App() {
     return cart.reduce((acc, current) => acc + (current.menuItem.price * current.quantity), 0);
   };
 
-  // FUNÇÃO DE CHECKOUT CORRIGIDA COM STRIPE DIRETO
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (cart.length === 0) {
-      alert(lang === 'pt' ? 'O seu carrinho está vazio!' : 'Your cart is empty!');
-      return;
-    }
+    if (cart.length === 0) return;
     
     setIsSubmitting(true);
     setSubmitError(null);
@@ -285,40 +202,26 @@ export default function App() {
     };
 
     try {
-      // 1. Guarda a reserva no Firebase primeiro
-      const docRef = await addDoc(collection(db, 'bookings'), bookingData);
-      localStorage.setItem('bib_booking_id', docRef.id);
+      // 1. Grava a reserva no Firebase
+      await addDoc(collection(db, 'bookings'), bookingData);
 
-      // 2. Cria o link de pagamento do Stripe e redireciona (Redirecionamento dinâmico simples via Stripe Checkout integrado)
-      const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-      if (!publishableKey) {
-        throw new Error("Stripe configuration missing on Vercel.");
+      // 2. Encaminha para o Link do Stripe correspondente ao item selecionado
+      const selectedItemId = cart[0]?.menuItem.id;
+      const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
+
+      if (stripeCheckoutUrl) {
+        setCart([]);
+        setIsCartOpen(false);
+        window.location.href = stripeCheckoutUrl;
+      } else {
+        alert(lang === 'pt' ? 'Redirecionando para o pagamento...' : 'Redirecting to payment...');
       }
-
-      // Preparar os items para enviar para o Stripe Payment Links ou Checkout
-      // Como estamos no cliente, a forma mais robusta e direta sem servidor é usar os Stripe Payment Links criados no painel do Stripe,
-      // ou redirecionar para uma sessão. Como queres descomplicado, vamos usar o redirecionamento ou alertar o sucesso.
-      
-      // Se tiveres os links do Stripe criados, podes colar aqui. Caso contrário, criamos uma simulação direta:
-      alert(lang === 'pt' ? 'Reserva Registada com sucesso! A redirecionar para pagamento...' : 'Booking registered! Redirecting to payment...');
-      
-      // Aqui o código assume que a Vercel vai tratar o checkout. 
-      // Para evitar o erro antigo, limpámos a chamada da função quebrada.
-      setCart([]);
-      setIsCartOpen(false);
-      setCreatedBookingId(docRef.id);
       
     } catch (err) {
-      setSubmitError(lang === 'pt' ? 'Erro ao processar o checkout. Verifica as configurações.' : 'Checkout error. Please check configurations.');
+      setSubmitError(lang === 'pt' ? 'Erro ao conectar à base de dados.' : 'Error connecting to database.');
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleSearchCheck = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!trackSearchId.trim()) return;
-    loadBookingDetails(trackSearchId.trim());
   };
 
   const filteredItems = activeCategory === 'all' 
@@ -328,10 +231,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-800 flex flex-col antialiased">
       
+      {/* Top Banner */}
       <div className="bg-[#1F1916] text-[#F9F6F0] py-2 px-4 text-xs font-semibold flex justify-between items-center z-40">
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-          <span>☀️ {lang === 'pt' ? 'Entrega garantida no seu Airbnb in Lisboa' : 'Guaranteed delivery to your Airbnb in Lisbon'}</span>
+          <span>☀️ {lang === 'pt' ? 'Entrega garantida no seu Airbnb em Lisboa' : 'Guaranteed delivery to your Airbnb in Lisbon'}</span>
         </div>
         <div className="flex items-center gap-4">
           <button type="button" onClick={() => setLang('pt')} className={`transition-colors py-0.5 px-2 rounded-md ${lang === 'pt' ? 'bg-amber-600 text-white' : 'hover:text-amber-300'}`}>Português</button>
@@ -339,49 +243,55 @@ export default function App() {
         </div>
       </div>
 
-      <section className="relative h-[550px] md:h-[600px] flex items-center justify-center text-center px-4 bg-cover bg-center overflow-hidden z-10" style={{ backgroundImage: "linear-gradient(rgba(10, 8, 6, 0.55), rgba(10, 8, 8, 0.85)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600&auto=format&fit=crop&q=80')" }}>
-        <div className="max-w-4xl mx-auto flex flex-col items-center gap-6 relative">
-          <div className="inline-flex items-center gap-2 px-4 py-2 border border-amber-400/30 bg-[#251D18]/80 text-amber-300 text-xs tracking-[0.2em] uppercase rounded-full font-semibold backdrop-blur-sm">
+      {/* Hero Section */}
+      <section className="relative h-[500px] flex items-center justify-center text-center px-4 bg-cover bg-center overflow-hidden" style={{ backgroundImage: "linear-gradient(rgba(10, 8, 6, 0.6), rgba(10, 8, 8, 0.9)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600&auto=format&fit=crop&q=80')" }}>
+        <div className="max-w-4xl mx-auto flex flex-col items-center gap-5 relative">
+          <div className="inline-flex items-center gap-2 px-4 py-2 border border-amber-400/30 bg-[#251D18]/80 text-amber-300 text-xs tracking-[0.2em] uppercase rounded-full font-semibold">
             <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Lisbon Premium Hospitality</span>
+            <span>Lisbon Local Flavors</span>
           </div>
-          
-          <h1 className="text-4xl md:text-7xl font-bold text-[#F9F6F0] tracking-tight leading-none font-serif">
+          <h1 className="text-4xl md:text-6xl font-bold text-[#F9F6F0] tracking-tight font-serif">
             Breakfast in Bed
-            <span className="block mt-1 text-amber-500 font-serif italic text-3xl md:text-6xl font-normal tracking-wide">Lisbon Experience</span>
+            <span className="block mt-1 text-amber-500 font-serif italic text-2xl md:text-5xl font-normal tracking-wide">Lisbon Experience</span>
           </h1>
-
-          <p className="text-base md:text-xl text-neutral-300 max-w-2xl font-light">
-            {lang === 'pt' ? 'Comece o dia com pura conveniência. Selecionamos pequenos-almoços artesanais cozidos na manhã da entrega.' : 'Begin your day with absolute convenience. We deliver handpicked, freshly baked breakfast boards.'}
+          <p className="text-sm md:text-lg text-neutral-300 max-w-2xl font-light">
+            {lang === 'pt' ? 'Pequenos-almoços e petiscos tradicionais entregues diretamente na porta do teu alojamento.' : 'Traditional breakfasts and savory snacks delivered right to your accommodation doorstep.'}
           </p>
-
-          <div className="flex flex-wrap justify-center gap-4 mt-4">
-            <a href="#menu" className="px-8 py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-lg transition-all text-sm flex items-center gap-2">
-              <Coffee className="w-4 h-4" />
-              {lang === 'pt' ? 'Ver Menus & Preços' : 'Browse Menus & Prices'}
-            </a>
-          </div>
         </div>
       </section>
 
-      <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto w-full flex-1 scroll-mt-20" id="menu">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+      {/* Category Filter */}
+      <div className="flex justify-center gap-4 mt-12">
+        <button onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
+          {lang === 'pt' ? 'Tudo' : 'All'}
+        </button>
+        <button onClick={() => setActiveCategory('menus')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'menus' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
+          Menus
+        </button>
+        <button onClick={() => setActiveCategory('snacks')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'snacks' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
+          {lang === 'pt' ? 'Petiscos / Salgados' : 'Savory Snacks'}
+        </button>
+      </div>
+
+      {/* Products Grid */}
+      <section className="py-12 px-4 md:px-8 max-w-7xl mx-auto w-full flex-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredItems.map(item => (
-            <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-neutral-200 flex flex-col shadow-sm hover:shadow-xl transition-all group">
-              <div className="relative h-64 overflow-hidden bg-neutral-100">
+            <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-neutral-200 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+              <div className="relative h-48 bg-neutral-100">
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
               </div>
-              <div className="p-6 md:p-8 flex-1 flex flex-col justify-between">
+              <div className="p-5 flex-1 flex flex-col justify-between gap-4">
                 <div>
-                  <div className="flex items-baseline justify-between gap-2 mb-3">
-                    <h3 className="text-xl md:text-2xl font-serif font-semibold text-neutral-900">{lang === 'pt' ? item.title : item.titleEn}</h3>
-                    <span className="text-lg font-bold text-amber-700">{item.price.toFixed(2)}€</span>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <h3 className="text-base font-bold text-neutral-900 font-serif">{lang === 'pt' ? item.title : item.titleEn}</h3>
+                    <span className="text-sm font-black text-amber-700 whitespace-nowrap">{item.price.toFixed(2)}€</span>
                   </div>
-                  <p className="text-xs text-neutral-500 mb-6">{lang === 'pt' ? item.description : item.descriptionEn}</p>
+                  <p className="text-xs text-neutral-500 line-clamp-2">{lang === 'pt' ? item.description : item.descriptionEn}</p>
                 </div>
-                <button onClick={() => addToCart(item)} type="button" className="w-full py-3 bg-[#1F1916] hover:bg-amber-700 text-white text-xs uppercase font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
-                  <ShoppingBag className="w-4 h-4" />
-                  {lang === 'pt' ? 'Adicionar ao Carrinho' : 'Add to Order'}
+                <button onClick={() => addToCart(item)} type="button" className="w-full py-2.5 bg-[#1F1916] hover:bg-amber-700 text-white text-xs uppercase font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  {lang === 'pt' ? 'Adicionar' : 'Add to Order'}
                 </button>
               </div>
             </div>
@@ -389,17 +299,19 @@ export default function App() {
         </div>
       </section>
 
+      {/* Floating Cart Button */}
       {cart.length > 0 && (
         <button onClick={() => setIsCartOpen(true)} type="button" className="fixed bottom-6 right-6 z-40 bg-amber-600 hover:bg-amber-700 text-white px-5 py-4 rounded-full shadow-2xl flex items-center gap-3 font-semibold">
           <ShoppingBag className="w-5 h-5" />
-          <span className="text-sm">{lang === 'pt' ? 'Encomendar' : 'Complete Order'}</span>
+          <span className="text-sm">{lang === 'pt' ? 'Completar Pedido' : 'Checkout'}</span>
           <span className="text-sm font-bold bg-[#1F1916]/20 px-2.5 py-0.5 rounded-lg">{getCartTotal().toFixed(2)}€</span>
         </button>
       )}
 
+      {/* Sidebar Cart / Checkout */}
       {isCartOpen && (
         <div className="fixed inset-0 bg-neutral-900/60 z-50 flex justify-end backdrop-blur-sm">
-          <div className="bg-white w-full max-w-xl h-full flex flex-col justify-between shadow-2xl overflow-y-auto p-6">
+          <div className="bg-white w-full max-w-md h-full flex flex-col justify-between shadow-2xl overflow-y-auto p-6">
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold">{lang === 'pt' ? 'O Teu Pedido' : 'My Order'}</h3>
@@ -408,32 +320,52 @@ export default function App() {
 
               {cart.map(item => (
                 <div key={item.menuItem.id} className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl mb-3">
-                  <div>
-                    <h4 className="text-xs font-bold">{lang === 'pt' ? item.menuItem.title : item.menuItem.titleEn}</h4>
-                    <span className="text-xs text-amber-700 font-bold">{item.menuItem.price.toFixed(2)}€</span>
+                  <div className="flex-1 pr-2">
+                    <h4 className="text-xs font-bold text-neutral-900">{lang === 'pt' ? item.menuItem.title : item.menuItem.titleEn}</h4>
+                    <span className="text-xs text-amber-700 font-bold">{(item.menuItem.price * item.quantity).toFixed(2)}€</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => updateQuantity(item.menuItem.id, -1)}><Minus className="w-3.5 h-3.5" /></button>
-                    <span className="w-6 text-center text-xs font-bold">{item.quantity}</span>
-                    <button type="button" onClick={() => updateQuantity(item.menuItem.id, 1)}><Plus className="w-3.5 h-3.5" /></button>
+                  <div className="flex items-center gap-2">
+                    <button type="button" className="p-1 hover:text-amber-600" onClick={() => updateQuantity(item.menuItem.id, -1)}><Minus className="w-3.5 h-3.5" /></button>
+                    <span className="w-4 text-center text-xs font-bold">{item.quantity}</span>
+                    <button type="button" className="p-1 hover:text-amber-600" onClick={() => updateQuantity(item.menuItem.id, 1)}><Plus className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
               ))}
               
-              <div className="text-right font-bold text-lg text-amber-700 mb-6">Total: {getCartTotal().toFixed(2)}€</div>
+              <div className="text-right font-black text-lg text-neutral-900 mt-4 mb-6 border-t pt-3">
+                Total: <span className="text-amber-700">{getCartTotal().toFixed(2)}€</span>
+              </div>
 
-              <form onSubmit={handleCheckoutSubmit} className="flex flex-col gap-4">
-                <input type="text" required placeholder={lang === 'pt' ? 'Seu Nome' : 'Your Name'} value={clientName} onChange={(e) => setClientName(e.target.value)} className="border p-2 rounded text-sm" />
-                <input type="email" required placeholder="Email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} className="border p-2 rounded text-sm" />
-                <input type="text" required placeholder={lang === 'pt' ? 'Telefone' : 'Phone'} value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} className="border p-2 rounded text-sm" />
-                <input type="text" required placeholder={lang === 'pt' ? 'Morada do Airbnb' : 'Airbnb Address'} value={airbnbAddress} onChange={(e) => setAirbnbAddress(e.target.value)} className="border p-2 rounded text-sm" />
-                <input type="date" required value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className="border p-2 rounded text-sm" />
+              <form onSubmit={handleCheckoutSubmit} className="flex flex-col gap-3.5">
+                <div className="text-xs font-bold uppercase text-neutral-400 tracking-wider mb-1">{lang === 'pt' ? 'Dados de Entrega' : 'Delivery Details'}</div>
+                <input type="text" required placeholder={lang === 'pt' ? 'Teu Nome' : 'Your Name'} value={clientName} onChange={(e) => setClientName(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
+                <input type="email" required placeholder="Email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
+                <input type="text" required placeholder={lang === 'pt' ? 'Telefone / WhatsApp' : 'Phone / WhatsApp'} value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
+                <input type="text" required placeholder={lang === 'pt' ? 'Morada Completa do Airbnb' : 'Full Airbnb Address'} value={airbnbAddress} onChange={(e) => setAirbnbAddress(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
                 
-                {submitError && <p className="text-red-500 text-xs">{submitError}</p>}
-                {createdBookingId && <p className="text-green-600 text-xs">{lang === 'pt' ? 'Reserva criada!' : 'Booking created!'}</p>}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] uppercase text-neutral-400 font-bold mb-1">{lang === 'pt' ? 'Data' : 'Date'}</label>
+                    <input type="date" required value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className="border p-2 rounded-xl text-xs w-full focus:outline-amber-600" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase text-neutral-400 font-bold mb-1">{lang === 'pt' ? 'Horário' : 'Time'}</label>
+                    <select value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} className="border p-2 rounded-xl text-xs w-full bg-white focus:outline-amber-600">
+                      <option value="08:00 - 08:30">08:00 - 08:30</option>
+                      <option value="08:30 - 09:00">08:30 - 09:00</option>
+                      <option value="09:00 - 09:30">09:00 - 09:30</option>
+                      <option value="09:30 - 10:00">09:30 - 10:00</option>
+                      <option value="10:00 - 10:30">10:00 - 10:30</option>
+                    </select>
+                  </div>
+                </div>
 
-                <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-sm">
-                  {isSubmitting ? '...' : (lang === 'pt' ? 'Confirmar e Pagar' : 'Confirm & Pay')}
+                <textarea placeholder={lang === 'pt' ? 'Notas adicionais (ex: código da porta, alergias...)' : 'Additional notes (e.g. door code, allergies...)'} value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full h-16 resize-none focus:outline-amber-600" />
+                
+                {submitError && <p className="text-red-500 text-xs font-bold">{submitError}</p>}
+
+                <button type="submit" disabled={isSubmitting} className="w-full mt-2 py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-neutral-400 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-colors shadow-md">
+                  {isSubmitting ? '...' : (lang === 'pt' ? 'Ir para Pagamento Seguro' : 'Proceed to Secure Payment')}
                 </button>
               </form>
             </div>

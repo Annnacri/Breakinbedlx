@@ -1,20 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
-  Coffee, 
   ShoppingBag, 
-  Calendar, 
-  Clock, 
-  MapPin, 
   Sparkles, 
-  Check, 
   Plus, 
   Minus, 
-  X, 
-  Trash2, 
-  Phone, 
-  Mail, 
-  User, 
-  Utensils
+  X
 } from 'lucide-react';
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
@@ -63,8 +53,8 @@ export default function App() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [step, setStep] = useState<'cart' | 'checkout'>('cart');
 
-  // OS TEUS 8 PRODUTOS REAIS AJUSTADOS COM OS PREÇOS DO STRIPE
   const menuItems: MenuItem[] = [
     {
       id: 'rissol-leitao',
@@ -155,6 +145,7 @@ export default function App() {
     } else {
       setCart([...cart, { menuItem: item, quantity: 1 }]);
     }
+    setStep('cart');
     setIsCartOpen(true);
   };
 
@@ -172,6 +163,23 @@ export default function App() {
 
   const getCartTotal = () => {
     return cart.reduce((acc, current) => acc + (current.menuItem.price * current.quantity), 0);
+  };
+
+  const executeStripeRedirect = () => {
+    const selectedItemId = cart[0]?.menuItem.id;
+    const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
+
+    if (stripeCheckoutUrl) {
+      const finalUrl = `${stripeCheckoutUrl}?prefilled_email=${encodeURIComponent(clientEmail)}`;
+      setCart([]);
+      setIsCartOpen(false);
+      setStep('cart');
+      window.location.href = finalUrl;
+    } else {
+      alert(lang === 'pt' ? 'Redirecionando para o pagamento...' : 'Redirecting to payment...');
+      // Fallback para o link geral caso falte algum id
+      window.location.href = 'https://buy.stripe.com/9B63cw2eybqibrB7dG5gc0a';
+    }
   };
 
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
@@ -201,23 +209,14 @@ export default function App() {
     };
 
     try {
-      // 1. Grava a reserva no Firebase
+      // 1. Grava os dados da reserva no Firebase de forma segura
       await addDoc(collection(db, 'bookings'), bookingData);
 
-      // 2. Encaminha para o Link do Stripe correspondente ao item selecionado
-      const selectedItemId = cart[0]?.menuItem.id;
-      const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
-
-      if (stripeCheckoutUrl) {
-        setCart([]);
-        setIsCartOpen(false);
-        window.location.href = stripeCheckoutUrl;
-      } else {
-        alert(lang === 'pt' ? 'Redirecionando para o pagamento...' : 'Redirecting to payment...');
-      }
+      // 2. Executa o redirecionamento imediato usando o link direto do Stripe
+      executeStripeRedirect();
       
     } catch (err) {
-      setSubmitError(lang === 'pt' ? 'Erro ao conectar à base de dados.' : 'Error connecting to database.');
+      setSubmitError(lang === 'pt' ? 'Erro ao conectar à base de dados. Tente novamente.' : 'Error connecting to database. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -317,56 +316,71 @@ export default function App() {
                 <button type="button" onClick={() => setIsCartOpen(false)}><X className="w-5 h-5" /></button>
               </div>
 
-              {cart.map(item => (
-                <div key={item.menuItem.id} className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl mb-3">
-                  <div className="flex-1 pr-2">
-                    <h4 className="text-xs font-bold text-neutral-900">{lang === 'pt' ? item.menuItem.title : item.menuItem.titleEn}</h4>
-                    <span className="text-xs text-amber-700 font-bold">{(item.menuItem.price * item.quantity).toFixed(2)}€</span>
+              {step === 'cart' ? (
+                <>
+                  {cart.map(item => (
+                    <div key={item.menuItem.id} className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl mb-3">
+                      <div className="flex-1 pr-2">
+                        <h4 className="text-xs font-bold text-neutral-900">{lang === 'pt' ? item.menuItem.title : item.menuItem.titleEn}</h4>
+                        <span className="text-xs text-amber-700 font-bold">{(item.menuItem.price * item.quantity).toFixed(2)}€</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button type="button" className="p-1 hover:text-amber-600" onClick={() => updateQuantity(item.menuItem.id, -1)}><Minus className="w-3.5 h-3.5" /></button>
+                        <span className="w-4 text-center text-xs font-bold">{item.quantity}</span>
+                        <button type="button" className="p-1 hover:text-amber-600" onClick={() => updateQuantity(item.menuItem.id, 1)}><Plus className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="text-right font-black text-lg text-neutral-900 mt-4 mb-6 border-t pt-3">
+                    Total: <span className="text-amber-700">{getCartTotal().toFixed(2)}€</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button type="button" className="p-1 hover:text-amber-600" onClick={() => updateQuantity(item.menuItem.id, -1)}><Minus className="w-3.5 h-3.5" /></button>
-                    <span className="w-4 text-center text-xs font-bold">{item.quantity}</span>
-                    <button type="button" className="p-1 hover:text-amber-600" onClick={() => updateQuantity(item.menuItem.id, 1)}><Plus className="w-3.5 h-3.5" /></button>
-                  </div>
-                </div>
-              ))}
-              
-              <div className="text-right font-black text-lg text-neutral-900 mt-4 mb-6 border-t pt-3">
-                Total: <span className="text-amber-700">{getCartTotal().toFixed(2)}€</span>
-              </div>
 
-              <form onSubmit={handleCheckoutSubmit} className="flex flex-col gap-3.5">
-                <div className="text-xs font-bold uppercase text-neutral-400 tracking-wider mb-1">{lang === 'pt' ? 'Dados de Entrega' : 'Delivery Details'}</div>
-                <input type="text" required placeholder={lang === 'pt' ? 'Teu Nome' : 'Your Name'} value={clientName} onChange={(e) => setClientName(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
-                <input type="email" required placeholder="Email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
-                <input type="text" required placeholder={lang === 'pt' ? 'Telefone / WhatsApp' : 'Phone / WhatsApp'} value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
-                <input type="text" required placeholder={lang === 'pt' ? 'Morada Completa do Airbnb' : 'Full Airbnb Address'} value={airbnbAddress} onChange={(e) => setAirbnbAddress(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] uppercase text-neutral-400 font-bold mb-1">{lang === 'pt' ? 'Data' : 'Date'}</label>
-                    <input type="date" required value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className="border p-2 rounded-xl text-xs w-full focus:outline-amber-600" />
+                  <button type="button" onClick={() => setStep('checkout')} className="w-full py-3 bg-[#1F1916] hover:bg-amber-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-colors">
+                    {lang === 'pt' ? 'Avançar para os Dados' : 'Proceed to Details'}
+                  </button>
+                </>
+              ) : (
+                <form onSubmit={handleCheckoutSubmit} className="flex flex-col gap-3.5">
+                  <div className="flex justify-between items-center mb-1">
+                    <div className="text-xs font-bold uppercase text-neutral-400 tracking-wider">{lang === 'pt' ? 'Dados de Entrega' : 'Delivery Details'}</div>
+                    <button type="button" onClick={() => setStep('cart')} className="text-xs text-amber-700 underline font-semibold">{lang === 'pt' ? 'Voltar ao carrinho' : 'Back to cart'}</button>
                   </div>
-                  <div>
-                    <label className="block text-[10px] uppercase text-neutral-400 font-bold mb-1">{lang === 'pt' ? 'Horário' : 'Time'}</label>
-                    <select value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} className="border p-2 rounded-xl text-xs w-full bg-white focus:outline-amber-600">
-                      <option value="08:00 - 08:30">08:00 - 08:30</option>
-                      <option value="08:30 - 09:00">08:30 - 09:00</option>
-                      <option value="09:00 - 09:30">09:00 - 09:30</option>
-                      <option value="09:30 - 10:00">09:30 - 10:00</option>
-                      <option value="10:00 - 10:30">10:00 - 10:30</option>
-                    </select>
+                  <input type="text" required placeholder={lang === 'pt' ? 'Teu Nome' : 'Your Name'} value={clientName} onChange={(e) => setClientName(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
+                  <input type="email" required placeholder="Email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
+                  <input type="text" required placeholder={lang === 'pt' ? 'Telefone / WhatsApp' : 'Phone / WhatsApp'} value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
+                  <input type="text" required placeholder={lang === 'pt' ? 'Morada Completa do Airbnb' : 'Full Airbnb Address'} value={airbnbAddress} onChange={(e) => setAirbnbAddress(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] uppercase text-neutral-400 font-bold mb-1">{lang === 'pt' ? 'Data' : 'Date'}</label>
+                      <input type="date" required value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className="border p-2 rounded-xl text-xs w-full focus:outline-amber-600" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase text-neutral-400 font-bold mb-1">{lang === 'pt' ? 'Horário' : 'Time'}</label>
+                      <select value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} className="border p-2 rounded-xl text-xs w-full bg-white focus:outline-amber-600">
+                        <option value="08:00 - 08:30">08:00 - 08:30</option>
+                        <option value="08:30 - 09:00">08:30 - 09:00</option>
+                        <option value="09:00 - 09:30">09:00 - 09:30</option>
+                        <option value="09:30 - 10:00">09:30 - 10:00</option>
+                        <option value="10:00 - 10:30">10:00 - 10:30</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
 
-                <textarea placeholder={lang === 'pt' ? 'Notas adicionais (ex: código da porta, alergias...)' : 'Additional notes (e.g. door code, allergies...)'} value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full h-16 resize-none focus:outline-amber-600" />
-                
-                {submitError && <p className="text-red-500 text-xs font-bold">{submitError}</p>}
+                  <textarea placeholder={lang === 'pt' ? 'Notas adicionais (ex: código da porta, alergias...)' : 'Additional notes (e.g. door code, allergies...)'} value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full h-16 resize-none focus:outline-amber-600" />
+                  
+                  {submitError && <p className="text-red-500 text-xs font-bold">{submitError}</p>}
 
-                <button type="submit" disabled={isSubmitting} className="w-full mt-2 py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-neutral-400 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-colors shadow-md">
-                  {isSubmitting ? '...' : (lang === 'pt' ? 'Ir para Pagamento Seguro' : 'Proceed to Secure Payment')}
-                </button>
-              </form>
+                  <div className="text-right font-black text-sm text-neutral-900 border-t pt-2 mb-1">
+                    Total a pagar: <span className="text-amber-700">{getCartTotal().toFixed(2)}€</span>
+                  </div>
+
+                  <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-neutral-400 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-colors shadow-md">
+                    {isSubmitting ? '...' : (lang === 'pt' ? 'Pay via Stripe' : 'Pay via Stripe')}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </div>

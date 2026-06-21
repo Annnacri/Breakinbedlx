@@ -2,18 +2,18 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Configuração do Firebase integrada diretamente
 const firebaseConfig = {
-  apiKey: "AIzaSyA4Q...", // O Firebase aceita a inicialização direta
-  authDomain: "breakfast-in-bed-lx.firebaseapp.com",
-  projectId: "breakfast-in-bed-lx",
-  storageBucket: "breakfast-in-bed-lx.appspot.com",
-  messagingSenderId: "103948573920",
-  appId: "1:103948573920:web:a1b2c3d4e5f6"
+  projectId: "breakfastinbed-lx",
+  appId: "1:513307013726:web:4a75dc0edd9a94f20bbacf",
+  apiKey: "AIzaSyCJ3eH-Sncdo9HGZeO9gkGck9woAUseWJE",
+  authDomain: "breakfastinbed-lx.firebaseapp.com",
+  storageBucket: "breakfastinbed-lx.firebasestorage.app",
+  messagingSenderId: "513307013726"
 };
 
-// Inicializa o Firebase com tratamento de erro nativo
+// Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
 
-export const db = getFirestore(app); 
+// Inicializa o Firestore apontando exatamente para a tua base de dados customizada
+export const db = getFirestore(app, "ai-studio-73b7d5b4-db50-4357-9c79-bcae112b4fd4"); 
 export const auth = getAuth(app);

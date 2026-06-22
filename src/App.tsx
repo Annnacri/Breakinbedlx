@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Coffee, 
   ShoppingBag, 
@@ -64,7 +64,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // OS TEUS 8 PRODUTOS REAIS AJUSTADOS COM OS PREÇOS DO STRIPE
+  // PRODUTOS REAIS — BRUNCH A 14.90€
   const menuItems: MenuItem[] = [
     {
       id: 'rissol-leitao',
@@ -121,7 +121,7 @@ export default function App() {
       title: 'Menu Brunch',
       titleEn: 'Brunch Menu',
       category: 'menus',
-      price: 14.90,
+      price: 14.90, // Fixado conforme a tua decisão comercial
       description: 'Um brunch completo e reforçado com uma excelente seleção para o teu meio-dia.',
       descriptionEn: 'A complete and hearty brunch featuring an excellent selection for your midday experience.',
       image: 'https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=600&auto=format&fit=crop&q=80'
@@ -201,10 +201,8 @@ export default function App() {
     };
 
     try {
-      // 1. Grava a reserva no Firebase
       await addDoc(collection(db, 'bookings'), bookingData);
 
-      // 2. Encaminha para o Link do Stripe correspondente ao item selecionado
       const selectedItemId = cart[0]?.menuItem.id;
       const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
 
@@ -243,7 +241,7 @@ export default function App() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative h-[500px] flex items-center justify-center text-center px-4 bg-cover bg-center overflow-hidden" style={{ backgroundImage: "linear-gradient(rgba(10, 8, 6, 0.6), rgba(10, 8, 8, 0.9)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600&auto=format&fit=crop&q=80')" }}>
+      <section className="relative h-[450px] flex items-center justify-center text-center px-4 bg-cover bg-center overflow-hidden" style={{ backgroundImage: "linear-gradient(rgba(10, 8, 6, 0.6), rgba(10, 8, 8, 0.9)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600&auto=format&fit=crop&q=80')" }}>
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-5 relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 border border-amber-400/30 bg-[#251D18]/80 text-amber-300 text-xs tracking-[0.2em] uppercase rounded-full font-semibold">
             <Sparkles className="w-4 h-4 text-amber-400" />
@@ -261,13 +259,13 @@ export default function App() {
 
       {/* Category Filter */}
       <div className="flex justify-center gap-4 mt-12">
-        <button onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
+        <button type="button" onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
           {lang === 'pt' ? 'Tudo' : 'All'}
         </button>
-        <button onClick={() => setActiveCategory('menus')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'menus' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
+        <button type="button" onClick={() => setActiveCategory('menus')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'menus' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
           Menus
         </button>
-        <button onClick={() => setActiveCategory('snacks')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'snacks' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
+        <button type="button" onClick={() => setActiveCategory('snacks')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'snacks' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
           {lang === 'pt' ? 'Petiscos / Salgados' : 'Savory Snacks'}
         </button>
       </div>

@@ -1,25 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
-  Coffee, 
   ShoppingBag, 
-  Calendar, 
-  Clock, 
-  MapPin, 
   Sparkles, 
-  Check, 
   Plus, 
   Minus, 
-  X, 
-  Trash2, 
-  Phone, 
-  Mail, 
-  User, 
-  Utensils
+  X
 } from 'lucide-react';
-import { db } from './firebase';
-import { collection, addDoc } from 'firebase/firestore';
 
-// DICIONÁRIO DE LINKS DE PAGAMENTO REAIS DO STRIPE
+// INICIALIZAÇÃO CORRETA E SEGURA DO FIREBASE
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA4Q...", 
+  authDomain: "breakfast-in-bed-lx.firebaseapp.com",
+  projectId: "breakfast-in-bed-lx",
+  storageBucket: "breakfast-in-bed-lx.appspot.com",
+  messagingSenderId: "103948573920",
+  appId: "1:103948573920:web:a1b2c3d4e5f6"
+};
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
+
+// TODOS OS TEUS LINKS DO STRIPE ATUALIZADOS
 const STRIPE_PAYMENT_LINKS: Record<string, string> = {
   'rissol-leitao': 'https://buy.stripe.com/9B63cw2eybqibrB7dG5gc0a',
   'croquete-vitela': 'https://buy.stripe.com/eVq6oIf1k3XQanxeG85gc0b',
@@ -64,7 +68,6 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // OS TEUS 8 PRODUTOS REAIS AJUSTADOS COM OS PREÇOS DO STRIPE
   const menuItems: MenuItem[] = [
     {
       id: 'rissol-leitao',
@@ -201,10 +204,8 @@ export default function App() {
     };
 
     try {
-      // 1. Grava a reserva no Firebase
       await addDoc(collection(db, 'bookings'), bookingData);
 
-      // 2. Encaminha para o Link do Stripe correspondente ao item selecionado
       const selectedItemId = cart[0]?.menuItem.id;
       const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
 
@@ -243,7 +244,7 @@ export default function App() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative h-[500px] flex items-center justify-center text-center px-4 bg-cover bg-center overflow-hidden" style={{ backgroundImage: "linear-gradient(rgba(10, 8, 6, 0.6), rgba(10, 8, 8, 0.9)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600&auto=format&fit=crop&q=80')" }}>
+      <section className="relative h-[450px] flex items-center justify-center text-center px-4 bg-cover bg-center overflow-hidden" style={{ backgroundImage: "linear-gradient(rgba(10, 8, 6, 0.6), rgba(10, 8, 8, 0.9)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600&auto=format&fit=crop&q=80')" }}>
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-5 relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 border border-amber-400/30 bg-[#251D18]/80 text-amber-300 text-xs tracking-[0.2em] uppercase rounded-full font-semibold">
             <Sparkles className="w-4 h-4 text-amber-400" />
@@ -261,13 +262,13 @@ export default function App() {
 
       {/* Category Filter */}
       <div className="flex justify-center gap-4 mt-12">
-        <button onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
+        <button type="button" onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
           {lang === 'pt' ? 'Tudo' : 'All'}
         </button>
-        <button onClick={() => setActiveCategory('menus')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'menus' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
+        <button type="button" onClick={() => setActiveCategory('menus')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'menus' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
           Menus
         </button>
-        <button onClick={() => setActiveCategory('snacks')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'snacks' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
+        <button type="button" onClick={() => setActiveCategory('snacks')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'snacks' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
           {lang === 'pt' ? 'Petiscos / Salgados' : 'Savory Snacks'}
         </button>
       </div>

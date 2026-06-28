@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Coffee, 
   ShoppingBag, 
@@ -64,87 +64,86 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // OS TEUS 8 PRODUTOS REAIS AJUSTADOS COM OS PREÇOS DO STRIPE
   const menuItems: MenuItem[] = [
     {
-      id: 'rissol-leitao',
-      title: 'Rissol de Leitão',
-      titleEn: 'Suckling Pig Rissol',
-      category: 'snacks',
-      price: 3.90,
-      description: 'Salgado tradicional crocante com recheio cremoso e intenso de leitão assado.',
-      descriptionEn: 'Traditional crispy savory pastry with a creamy and intense roasted suckling pig filling.',
-      image: 'https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'croquete-vitela',
-      title: 'Croquete de Vitela',
-      titleEn: 'Veal Croquette',
-      category: 'snacks',
-      price: 1.90,
-      description: 'Croquete artesanal feito com carne de vitela selecionada e frito na perfeição.',
-      descriptionEn: 'Artisanal croquette made with selected veal meat and fried to golden perfection.',
-      image: 'https://images.unsplash.com/photo-1626132647523-66f5bf380027?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'prego-pao',
-      title: 'Prego no Pão c/ Picles',
-      titleEn: 'Prego Steak Sandwich with Pickles',
-      category: 'snacks',
-      price: 4.90,
-      description: 'Prego de carne tenra em pão tipicamente português, acompanhado com picles estaladiços.',
-      descriptionEn: 'Tender beef steak sandwich in traditional Portuguese bread, served with crunchy pickles.',
-      image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'bifana-portuguesa',
-      title: 'Bifana à Portuguesa no Pão',
-      titleEn: 'Portuguese Bifana Pork Sandwich',
-      category: 'snacks',
-      price: 3.90,
-      description: 'A clássica bifana de porco marinada em vinagre, alho e especiarias, servida quente no pão.',
-      descriptionEn: 'The classic Portuguese pork sandwich marinated in garlic, wine, and spices, served hot.',
-      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'menu-summer',
-      title: 'Menu Verão',
-      titleEn: 'Summer Menu',
+      id: 'menu-vitamina-c',
+      title: 'Menu Vitamina C',
+      titleEn: 'Vitamin C Menu',
       category: 'menus',
-      price: 9.90,
-      description: 'Opção leve e refrescante ideal para as manhãs quentes e radiantes de Lisboa.',
-      descriptionEn: 'A light and refreshing option ideal for Lisbon’s warm and radiant mornings.',
-      image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'menu-brunch',
-      title: 'Menu Brunch',
-      titleEn: 'Brunch Menu',
-      category: 'menus',
-      price: 14.90,
-      description: 'Um brunch completo e reforçado com uma excelente seleção para o teu meio-dia.',
-      descriptionEn: 'A complete and hearty brunch featuring an excellent selection for your midday experience.',
-      image: 'https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=600&auto=format&fit=crop&q=80'
+      price: 10.90,
+      description: 'Sumo de laranja, torta de laranja caseira, quiche de cogumelos, croissants recheados com queijo cottage e kiwi.',
+      descriptionEn: 'Fresh orange juice, homemade orange roll cake, mushroom quiche, croissants stuffed with cottage cheese and kiwi.',
+      image: 'https://images.unsplash.com/photo-1621510456681-23a23cfb5f57?w=600&auto=format&fit=crop&q=80'
     },
     {
       id: 'menu-portugues',
       title: 'Menu Português',
       titleEn: 'Portuguese Menu',
       category: 'menus',
-      price: 8.90,
-      description: 'A simbiose perfeita dos sabores tradicionais portugueses num pequeno-almoço autêntico.',
-      descriptionEn: 'The perfect symbiosis of traditional Portuguese flavors in an authentic breakfast.',
+      price: 9.90,
+      description: 'Leite com chocolate, pão de mistura c/ presunto, pastel de bacalhau e pastel de nata.',
+      descriptionEn: 'Chocolate milk, mixed bread with presunto, codfish fritter, and the traditional pastel de nata.',
       image: 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=600&auto=format&fit=crop&q=80'
     },
     {
-      id: 'menu-vitamina-c',
-      title: 'Menu Vitamina C',
-      titleEn: 'Vitamin C Menu',
+      id: 'menu-brunch',
+      title: 'Menu Brunch',
+      titleEn: 'Brunch Menu',
+      category: 'menus',
+      price: 15.90,
+      description: 'Sumo de laranja, ovos mexidos com farinheira, mini tostas, rissol de camarão, rissol de leitão, patê de sardinha e tarte caseira de maçã.',
+      descriptionEn: 'Orange juice, scrambled eggs with farinheira sausage, mini toasts, shrimp patty, suckling pig patty, sardine pâté, and homemade apple tart.',
+      image: 'https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'menu-summer',
+      title: 'Menu Summer',
+      titleEn: 'Summer Menu',
       category: 'menus',
       price: 9.90,
-      description: 'Uma opção energética, sumarenta e fresca rica em vitamina C, perfeita para começar o dia.',
-      descriptionEn: 'An energizing, juicy, and fresh choice packed with vitamin C, perfect to kickstart your day.',
-      image: 'https://images.unsplash.com/photo-1621510456681-23a23cfb5f57?w=600&auto=format&fit=crop&q=80'
+      description: 'Sumo de limão fresco, queijo fresco tempo, torrada com pasta de atum e alface, torta de limão.',
+      descriptionEn: 'Fresh lemonade, seasoned fresh cheese, tuna and lettuce toast, lemon roll cake.',
+      image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'bifana-portuguesa',
+      title: 'Bifana à Portuguesa no Pão',
+      titleEn: 'Portuguese Bifana in Bread',
+      category: 'snacks',
+      price: 4.90,
+      description: 'Deliciosa bifana tradicional portuguesa servida quente no pão.',
+      descriptionEn: 'Delicious traditional Portuguese pork sandwich served hot in bread.',
+      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'prego-pao',
+      title: 'Prego no Pão c/ Picles',
+      titleEn: 'Prego Steak Sandwich w/ Pickles',
+      category: 'snacks',
+      price: 4.90,
+      description: 'Prego de carne tenra em pão com picles.',
+      descriptionEn: 'Tender steak sandwich in bread with pickles.',
+      image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'croquete-vitela',
+      title: 'Croquete de Vitela',
+      titleEn: 'Veal Croquette',
+      category: 'snacks',
+      price: 2.20,
+      description: 'Croquete de vitela artesanal e crocante.',
+      descriptionEn: 'Artisanal, crispy veal croquette.',
+      image: 'https://images.unsplash.com/photo-1626132647523-66f5bf380027?w=600&auto=format&fit=crop&q=80'
+    },
+    {
+      id: 'rissol-leitao',
+      title: 'Rissol de Leitão',
+      titleEn: 'Suckling Pig Patty',
+      category: 'snacks',
+      price: 3.90,
+      description: 'Salgado tradicional com recheio cremoso de leitão.',
+      descriptionEn: 'Traditional pastry filled with creamy roasted suckling pig.',
+      image: 'https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=600&auto=format&fit=crop&q=80'
     }
   ];
 
@@ -181,6 +180,8 @@ export default function App() {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    const totalComEntrega = getCartTotal() + 3.90;
+
     const bookingData = {
       clientName,
       clientEmail,
@@ -195,29 +196,29 @@ export default function App() {
         quantity: c.quantity,
         price: c.menuItem.price
       })),
-      totalPrice: getCartTotal(),
+      subtotal: getCartTotal(),
+      deliveryFee: 3.90,
+      totalPrice: totalComEntrega,
       status: 'pending',
       createdAt: new Date().toISOString()
     };
 
     try {
-      // 1. Grava a reserva no Firebase
       await addDoc(collection(db, 'bookings'), bookingData);
 
-      // 2. Encaminha para o Link do Stripe correspondente ao item selecionado
-      const selectedItemId = cart[0]?.menuItem.id;
-      const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
+      const itemPrincipalId = cart[0]?.menuItem.id;
+      const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[itemPrincipalId];
 
       if (stripeCheckoutUrl) {
         setCart([]);
         setIsCartOpen(false);
         window.location.href = stripeCheckoutUrl;
       } else {
-        alert(lang === 'pt' ? 'Redirecionando para o pagamento...' : 'Redirecting to payment...');
+        alert(lang === 'pt' ? 'Redirecionando para o pagamento seguro...' : 'Redirecting to secure payment...');
+        window.location.href = 'https://checkout.stripe.com';
       }
-      
     } catch (err) {
-      setSubmitError(lang === 'pt' ? 'Erro ao conectar à base de dados.' : 'Error connecting to database.');
+      setSubmitError(lang === 'pt' ? 'Erro ao processar a reserva. Tente novamente.' : 'Error processing your booking. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -286,7 +287,7 @@ export default function App() {
                     <h3 className="text-base font-bold text-neutral-900 font-serif">{lang === 'pt' ? item.title : item.titleEn}</h3>
                     <span className="text-sm font-black text-amber-700 whitespace-nowrap">{item.price.toFixed(2)}€</span>
                   </div>
-                  <p className="text-xs text-neutral-500 line-clamp-2">{lang === 'pt' ? item.description : item.descriptionEn}</p>
+                  <p className="text-xs text-neutral-500 line-clamp-3">{lang === 'pt' ? item.description : item.descriptionEn}</p>
                 </div>
                 <button onClick={() => addToCart(item)} type="button" className="w-full py-2.5 bg-[#1F1916] hover:bg-amber-700 text-white text-xs uppercase font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
                   <ShoppingBag className="w-3.5 h-3.5" />
@@ -331,8 +332,14 @@ export default function App() {
                 </div>
               ))}
               
-              <div className="text-right font-black text-lg text-neutral-900 mt-4 mb-6 border-t pt-3">
-                Total: <span className="text-amber-700">{getCartTotal().toFixed(2)}€</span>
+              <div className="text-right font-black text-sm text-neutral-900 mt-4 border-t pt-3">
+                {lang === 'pt' ? 'Subtotal:' : 'Subtotal:'} <span className="text-neutral-700">{getCartTotal().toFixed(2)}€</span>
+              </div>
+              <div className="text-right font-black text-sm text-neutral-900 mt-1">
+                {lang === 'pt' ? 'Taxa de Entrega:' : 'Delivery Fee:'} <span className="text-neutral-700">3.90€</span>
+              </div>
+              <div className="text-right font-black text-lg text-neutral-900 mt-1 mb-6 border-b pb-3">
+                Total: <span className="text-amber-700">{(getCartTotal() + 3.90).toFixed(2)}€</span>
               </div>
 
               <form onSubmit={handleCheckoutSubmit} className="flex flex-col gap-3.5">
@@ -364,7 +371,7 @@ export default function App() {
                 {submitError && <p className="text-red-500 text-xs font-bold">{submitError}</p>}
 
                 <button type="submit" disabled={isSubmitting} className="w-full mt-2 py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-neutral-400 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-colors shadow-md">
-                  {isSubmitting ? '...' : (lang === 'pt' ? 'Ir para Pagamento Seguro' : 'Proceed to Secure Payment')}
+                  {isSubmitting ? '...' : (lang === 'pt' ? 'Pague via Stripe' : 'Pay via Stripe')}
                 </button>
               </form>
             </div>

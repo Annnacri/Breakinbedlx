@@ -1,35 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
-  Coffee, 
   ShoppingBag, 
-  Calendar, 
-  Clock, 
-  MapPin, 
   Sparkles, 
-  Check, 
   Plus, 
   Minus, 
-  X, 
-  Trash2, 
-  Phone, 
-  Mail, 
-  User, 
-  Utensils
+  X
 } from 'lucide-react';
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
-
-// DICIONÁRIO DE LINKS DE PAGAMENTO REAIS DO STRIPE
-const STRIPE_PAYMENT_LINKS: Record<string, string> = {
-  'rissol-leitao': 'https://buy.stripe.com/9B63cw2eybqibrB7dG5gc0a',
-  'croquete-vitela': 'https://buy.stripe.com/eVq6oIf1k3XQanxeG85gc0b',
-  'prego-pao': 'https://buy.stripe.com/8x214odXgbqi53deG85gc0c',
-  'bifana-portuguesa': 'https://buy.stripe.com/00w3cw7yS51U7bldC45gc0d',
-  'menu-summer': 'https://buy.stripe.com/00w7sM4mGameeDN1Tm5gc0e',
-  'menu-brunch': 'https://buy.stripe.com/00wcN62eydyqcvF9lO5gc0f',
-  'menu-portugues': 'https://buy.stripe.com/aFa4gA6uOcum67hcy05gc0j',
-  'menu-vitamina-c': 'https://buy.stripe.com/bJeaEY1audyq7bl0Pi5gc0l',
-};
 
 interface MenuItem {
   id: string;
@@ -64,88 +42,15 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // OS TEUS 8 PRODUTOS REAIS AJUSTADOS COM OS PREÇOS DO STRIPE
   const menuItems: MenuItem[] = [
-    {
-      id: 'rissol-leitao',
-      title: 'Rissol de Leitão',
-      titleEn: 'Suckling Pig Rissol',
-      category: 'snacks',
-      price: 3.90,
-      description: 'Salgado tradicional crocante com recheio cremoso e intenso de leitão assado.',
-      descriptionEn: 'Traditional crispy savory pastry with a creamy and intense roasted suckling pig filling.',
-      image: 'https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'croquete-vitela',
-      title: 'Croquete de Vitela',
-      titleEn: 'Veal Croquette',
-      category: 'snacks',
-      price: 1.90,
-      description: 'Croquete artesanal feito com carne de vitela selecionada e frito na perfeição.',
-      descriptionEn: 'Artisanal croquette made with selected veal meat and fried to golden perfection.',
-      image: 'https://images.unsplash.com/photo-1626132647523-66f5bf380027?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'prego-pao',
-      title: 'Prego no Pão c/ Picles',
-      titleEn: 'Prego Steak Sandwich with Pickles',
-      category: 'snacks',
-      price: 4.90,
-      description: 'Prego de carne tenra em pão tipicamente português, acompanhado com picles estaladiços.',
-      descriptionEn: 'Tender beef steak sandwich in traditional Portuguese bread, served with crunchy pickles.',
-      image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'bifana-portuguesa',
-      title: 'Bifana à Portuguesa no Pão',
-      titleEn: 'Portuguese Bifana Pork Sandwich',
-      category: 'snacks',
-      price: 3.90,
-      description: 'A clássica bifana de porco marinada em vinagre, alho e especiarias, servida quente no pão.',
-      descriptionEn: 'The classic Portuguese pork sandwich marinated in garlic, wine, and spices, served hot.',
-      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'menu-summer',
-      title: 'Menu Verão',
-      titleEn: 'Summer Menu',
-      category: 'menus',
-      price: 9.90,
-      description: 'Opção leve e refrescante ideal para as manhãs quentes e radiantes de Lisboa.',
-      descriptionEn: 'A light and refreshing option ideal for Lisbon’s warm and radiant mornings.',
-      image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'menu-brunch',
-      title: 'Menu Brunch',
-      titleEn: 'Brunch Menu',
-      category: 'menus',
-      price: 14.90,
-      description: 'Um brunch completo e reforçado com uma excelente seleção para o teu meio-dia.',
-      descriptionEn: 'A complete and hearty brunch featuring an excellent selection for your midday experience.',
-      image: 'https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'menu-portugues',
-      title: 'Menu Português',
-      titleEn: 'Portuguese Menu',
-      category: 'menus',
-      price: 8.90,
-      description: 'A simbiose perfeita dos sabores tradicionais portugueses num pequeno-almoço autêntico.',
-      descriptionEn: 'The perfect symbiosis of traditional Portuguese flavors in an authentic breakfast.',
-      image: 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=600&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'menu-vitamina-c',
-      title: 'Menu Vitamina C',
-      titleEn: 'Vitamin C Menu',
-      category: 'menus',
-      price: 9.90,
-      description: 'Uma opção energética, sumarenta e fresca rica em vitamina C, perfeita para começar o dia.',
-      descriptionEn: 'An energizing, juicy, and fresh choice packed with vitamin C, perfect to kickstart your day.',
-      image: 'https://images.unsplash.com/photo-1621510456681-23a23cfb5f57?w=600&auto=format&fit=crop&q=80'
-    }
+    { id: 'rissol-leitao', title: 'Rissol de Leitão', titleEn: 'Suckling Pig Rissol', category: 'snacks', price: 3.90, description: 'Salgado tradicional crocante com recheio cremoso e intenso de leitão assado.', descriptionEn: 'Traditional crispy savory pastry with a creamy and intense roasted suckling pig filling.', image: 'https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=600&auto=format&fit=crop&q=80' },
+    { id: 'croquete-vitela', title: 'Croquete de Vitela', titleEn: 'Veal Croquette', category: 'snacks', price: 1.90, description: 'Croquete artesanal feito com carne de vitela selecionada e frito na perfeição.', descriptionEn: 'Artisanal croquette made with selected veal meat and fried to golden perfection.', image: 'https://images.unsplash.com/photo-1626132647523-66f5bf380027?w=600&auto=format&fit=crop&q=80' },
+    { id: 'prego-pao', title: 'Prego no Pão c/ Picles', titleEn: 'Prego Steak Sandwich with Pickles', category: 'snacks', price: 4.90, description: 'Prego de carne tenra em pão tipicamente português, acompanhado com picles estaladiços.', descriptionEn: 'Tender beef steak sandwich in traditional Portuguese bread, served with crunchy pickles.', image: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&auto=format&fit=crop&q=80' },
+    { id: 'bifana-portuguesa', title: 'Bifana à Portuguesa no Pão', titleEn: 'Portuguese Bifana Pork Sandwich', category: 'snacks', price: 3.90, description: 'A clássica bifana de porco marinada em vinagre, alho e especiarias, servida quente no pão.', descriptionEn: 'The classic Portuguese pork sandwich marinated in garlic, wine, and spices, served hot.', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80' },
+    { id: 'menu-summer', title: 'Menu Verão', titleEn: 'Summer Menu', category: 'menus', price: 9.90, description: 'Opção leve e refrescante ideal para as manhãs quentes e radiantes de Lisboa.', descriptionEn: 'A light and refreshing option ideal for Lisbon’s warm and radiant mornings.', image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=600&auto=format&fit=crop&q=80' },
+    { id: 'menu-brunch', title: 'Menu Brunch', titleEn: 'Brunch Menu', category: 'menus', price: 14.90, description: 'Um brunch completo e reforçado com uma excelente seleção para o teu meio-dia.', descriptionEn: 'A complete and hearty brunch featuring an excellent selection for your midday experience.', image: 'https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=600&auto=format&fit=crop&q=80' },
+    { id: 'menu-portugues', title: 'Menu Português', titleEn: 'Portuguese Menu', category: 'menus', price: 8.90, description: 'A simbiose perfeita dos sabores tradicionais portugueses num pequeno-almoço autêntico.', descriptionEn: 'The perfect symbiosis of traditional Portuguese flavors in an authentic breakfast.', image: 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=600&auto=format&fit=crop&q=80' },
+    { id: 'menu-vitamina-c', title: 'Menu Vitamina C', titleEn: 'Vitamin C Menu', category: 'menus', price: 9.90, description: 'Uma opção energética, sumarenta e fresca rica em vitamina C, perfeita para começar o dia.', descriptionEn: 'An energizing, juicy, and fresh choice packed with vitamin C, perfect to kickstart your day.', image: 'https://images.unsplash.com/photo-1621510456681-23a23cfb5f57?w=600&auto=format&fit=crop&q=80' }
   ];
 
   const addToCart = (item: MenuItem) => {
@@ -166,13 +71,10 @@ export default function App() {
       }
       return c;
     }).filter((c): c is CartItem => c !== null);
-    
     setCart(updated);
   };
 
-  const getCartTotal = () => {
-    return cart.reduce((acc, current) => acc + (current.menuItem.price * current.quantity), 0);
-  };
+  const getCartTotal = () => cart.reduce((acc, current) => acc + (current.menuItem.price * current.quantity), 0);
 
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,40 +84,28 @@ export default function App() {
     setSubmitError(null);
 
     const bookingData = {
-      clientName,
-      clientEmail,
-      clientPhone,
-      airbnbAddress,
-      deliveryDate,
-      deliveryTime,
-      deliveryNotes: deliveryNotes || '',
-      items: cart.map(c => ({
-        id: c.menuItem.id,
-        title: lang === 'pt' ? c.menuItem.title : c.menuItem.titleEn,
-        quantity: c.quantity,
-        price: c.menuItem.price
-      })),
+      clientName, clientEmail, clientPhone, airbnbAddress,
+      deliveryDate, deliveryTime, deliveryNotes: deliveryNotes || '',
+      items: cart.map(c => ({ id: c.menuItem.id, title: lang === 'pt' ? c.menuItem.title : c.menuItem.titleEn, quantity: c.quantity, price: c.menuItem.price })),
       totalPrice: getCartTotal(),
       status: 'pending',
       createdAt: new Date().toISOString()
     };
 
     try {
-      // 1. Grava a reserva no Firebase
       await addDoc(collection(db, 'bookings'), bookingData);
-
-      // 2. Encaminha para o Link do Stripe correspondente ao item selecionado
-      const selectedItemId = cart[0]?.menuItem.id;
-      const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
-
-      if (stripeCheckoutUrl) {
-        setCart([]);
-        setIsCartOpen(false);
-        window.location.href = stripeCheckoutUrl;
-      } else {
-        alert(lang === 'pt' ? 'Redirecionando para o pagamento...' : 'Redirecting to payment...');
-      }
       
+      // Calcula o total do carrinho em cêntimos (ex: 15.90€ = 1590)
+      const totalInCents = Math.round(getCartTotal() * 100);
+      
+      // O teu link genérico da Stripe. Ele vai sobrescrever o valor de 1€ pelo valor real do carrinho.
+      const stripeBaseLink = 'https://buy.stripe.com/14A4gA5qKbqi2V50Pi5gc0y'; 
+      
+      // Manda o cliente para a página de pagamento com o valor exato
+      window.location.href = `${stripeBaseLink}?prefilled_amount=${totalInCents}`;
+      
+      setCart([]);
+      setIsCartOpen(false);
     } catch (err) {
       setSubmitError(lang === 'pt' ? 'Erro ao conectar à base de dados.' : 'Error connecting to database.');
     } finally {
@@ -223,14 +113,10 @@ export default function App() {
     }
   };
 
-  const filteredItems = activeCategory === 'all' 
-    ? menuItems 
-    : menuItems.filter(item => item.category === activeCategory);
+  const filteredItems = activeCategory === 'all' ? menuItems : menuItems.filter(item => item.category === activeCategory);
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-800 flex flex-col antialiased">
-      
-      {/* Top Banner */}
       <div className="bg-[#1F1916] text-[#F9F6F0] py-2 px-4 text-xs font-semibold flex justify-between items-center z-40">
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
@@ -242,7 +128,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Hero Section */}
       <section className="relative h-[500px] flex items-center justify-center text-center px-4 bg-cover bg-center overflow-hidden" style={{ backgroundImage: "linear-gradient(rgba(10, 8, 6, 0.6), rgba(10, 8, 8, 0.9)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600&auto=format&fit=crop&q=80')" }}>
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-5 relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 border border-amber-400/30 bg-[#251D18]/80 text-amber-300 text-xs tracking-[0.2em] uppercase rounded-full font-semibold">
@@ -259,27 +144,17 @@ export default function App() {
         </div>
       </section>
 
-      {/* Category Filter */}
       <div className="flex justify-center gap-4 mt-12">
-        <button onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
-          {lang === 'pt' ? 'Tudo' : 'All'}
-        </button>
-        <button onClick={() => setActiveCategory('menus')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'menus' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
-          Menus
-        </button>
-        <button onClick={() => setActiveCategory('snacks')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'snacks' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
-          {lang === 'pt' ? 'Petiscos / Salgados' : 'Savory Snacks'}
-        </button>
+        <button onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>{lang === 'pt' ? 'Tudo' : 'All'}</button>
+        <button onClick={() => setActiveCategory('menus')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'menus' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>Menus</button>
+        <button onClick={() => setActiveCategory('snacks')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'snacks' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>{lang === 'pt' ? 'Petiscos / Salgados' : 'Savory Snacks'}</button>
       </div>
 
-      {/* Products Grid */}
       <section className="py-12 px-4 md:px-8 max-w-7xl mx-auto w-full flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredItems.map(item => (
             <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-neutral-200 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
-              <div className="relative h-48 bg-neutral-100">
-                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-              </div>
+              <div className="relative h-48 bg-neutral-100"><img src={item.image} alt={item.title} className="w-full h-full object-cover" /></div>
               <div className="p-5 flex-1 flex flex-col justify-between gap-4">
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-1">
@@ -298,7 +173,6 @@ export default function App() {
         </div>
       </section>
 
-      {/* Floating Cart Button */}
       {cart.length > 0 && (
         <button onClick={() => setIsCartOpen(true)} type="button" className="fixed bottom-6 right-6 z-40 bg-amber-600 hover:bg-amber-700 text-white px-5 py-4 rounded-full shadow-2xl flex items-center gap-3 font-semibold">
           <ShoppingBag className="w-5 h-5" />
@@ -307,7 +181,6 @@ export default function App() {
         </button>
       )}
 
-      {/* Sidebar Cart / Checkout */}
       {isCartOpen && (
         <div className="fixed inset-0 bg-neutral-900/60 z-50 flex justify-end backdrop-blur-sm">
           <div className="bg-white w-full max-w-md h-full flex flex-col justify-between shadow-2xl overflow-y-auto p-6">

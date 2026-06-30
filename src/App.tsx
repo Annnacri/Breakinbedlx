@@ -1,63 +1,50 @@
-const handleCheckoutSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (cart.length === 0) return;
-    
-    setIsSubmitting(true);
-    setSubmitError(null);
+import { useState } from 'react';
+import { ShoppingBag, Plus, Minus, X, Sparkles } from 'lucide-react';
+import { db } from './firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
-    // 1. Ir buscar o link do Stripe ANTES de mexer no Firebase para garantir que ele existe
-    const selectedItemId = cart[0]?.menuItem.id;
-    const stripeCheckoutUrl = STRIPE_PAYMENT_LINKS[selectedItemId];
+// DICIONÁRIO DE LINKS DE PAGAMENTO REAIS DO STRIPE
+const STRIPE_PAYMENT_LINKS: Record<string, string> = {
+  'rissol-leitao': 'https://buy.stripe.com/9B63cw2eybqibrB7dG5gc0a',
+  'croquete-vitela': 'https://buy.stripe.com/eVq6oIf1k3XQanxeG85gc0b',
+  'prego-pao': 'https://buy.stripe.com/8x214odXgbqi53deG85gc0c',
+  'bifana-portuguesa': 'https://buy.stripe.com/00w3cw7yS51U7bldC45gc0d',
+  'menu-summer': 'https://buy.stripe.com/00w7sM4mGameeDN1Tm5gc0e',
+  'menu-brunch': 'https://buy.stripe.com/00wcN62eydyqcvF9lO5gc0f',
+  'menu-portugues': 'https://buy.stripe.com/aFa4gA6uOcum67hcy05gc0j',
+  'menu-vitamina-c': 'https://buy.stripe.com/bJeaEY1audyq7bl0Pi5gc0l',
+};
 
-    if (!stripeCheckoutUrl) {
-      setSubmitError(lang === 'pt' 
-        ? 'Link de pagamento não encontrado para este produto.' 
-        : 'Payment link not found for this product.');
-      setIsSubmitting(false);
-      return;
-    }
+interface MenuItem {
+  id: string;
+  title: string;
+  titleEn: string;
+  category: 'snacks' | 'menus';
+  price: number;
+  description: string;
+  descriptionEn: string;
+  image: string;
+}
 
-    const bookingData = {
-      clientName,
-      clientEmail,
-      clientPhone,
-      airbnbAddress,
-      deliveryDate,
-      deliveryTime,
-      deliveryNotes: deliveryNotes || '',
-      items: cart.map(c => ({
-        id: c.menuItem.id,
-        title: lang === 'pt' ? c.menuItem.title : c.menuItem.titleEn,
-        quantity: c.quantity,
-        price: c.menuItem.price
-      })),
-      totalPrice: getCartTotal(),
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    };
+interface CartItem {
+  menuItem: MenuItem;
+  quantity: number;
+}
 
-    try {
-      // 2. Tentar gravar no Firebase. 
-      // Usamos um bloco try/catch isolado para que, mesmo que o Firebase falhe, o cliente consiga pagar!
-      try {
-        await addDoc(collection(db, 'bookings'), bookingData);
-      } catch (firebaseErr) {
-        console.error("Erro ao gravar no Firebase (Verifica as regras do Firestore):", firebaseErr);
-        // Não bloqueia o utilizador, deixa-o ir pagar
-      }
-
-      // 3. Limpar o carrinho antes de sair
-      setCart([]);
-      setIsCartOpen(false);
-
-      // 4. Redirecionamento forçado e limpo
-      console.log("A redirecionar para:", stripeCheckoutUrl);
-      window.location.assign(stripeCheckoutUrl);
-      
-    } catch (err) {
-      console.error("Erro geral no submit:", err);
-      setSubmitError(lang === 'pt' ? 'Erro ao conectar.' : 'Connection error.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+export default function App() {
+  // Estados da Aplicação
+  const [lang, setLang] = useState<'pt' | 'en'>('pt');
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<'all' | 'snacks' | 'menus'>('all');
+  
+  // Estados do Formulário do Cliente
+  const [clientName, setClientName] = useState('');
+  const [clientEmail, setClientEmail] = useState('');
+  const [clientPhone, setClientPhone] = useState('');
+  const [airbnbAddress, setAirbnbAddress] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [deliveryTime, setDeliveryTime] = useState('08:30 - 09:00');
+  const [deliveryNotes, setDeliveryNotes] = useState('');
+  
+  // Estados de Car

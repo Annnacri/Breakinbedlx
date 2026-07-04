@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "outputDirectory": "dist",
+  "env": {
+    "STRIPE_SECRET_KEY": "@stripe_secret_key",
+    "VERCEL_URL": "@vercel_url"
+  }
+}

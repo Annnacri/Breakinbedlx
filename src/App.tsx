@@ -1,21 +1,11 @@
 import { useState, useEffect } from 'react';
 import { 
-  Coffee, 
   ShoppingBag, 
-  Calendar, 
-  Clock, 
-  MapPin, 
   Sparkles, 
   Check, 
   Plus, 
   Minus, 
-  X, 
-  Trash2, 
-  Phone, 
-  Mail, 
-  User, 
-  Utensils,
-  ArrowLeft
+  X
 } from 'lucide-react';
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
@@ -136,7 +126,7 @@ export default function App() {
       category: 'menus',
       price: 9.90,
       description: 'Opção leve e refrescante ideal para as manhãs quentes e radiantes de Lisboa.',
-      descriptionEn: 'A light and refreshing option ideal for Lisbon's warm and radiant mornings.',
+      descriptionEn: 'A light and refreshing option ideal for Lisbon\'s warm and radiant mornings.',
       image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=600&auto=format&fit=crop&q=80'
     },
     {

@@ -48,7 +48,6 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Detectar retorno do Stripe
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
@@ -60,7 +59,6 @@ export default function App() {
     }
   }, []);
 
-  // Restaurar carrinho do localStorage
   useEffect(() => {
     const saved = localStorage.getItem('breakinbed_cart');
     if (saved) {
@@ -72,12 +70,10 @@ export default function App() {
     }
   }, []);
 
-  // Salvar carrinho no localStorage
   useEffect(() => {
     localStorage.setItem('breakinbed_cart', JSON.stringify(cart));
   }, [cart]);
 
-  // OS TEUS 8 PRODUTOS REAIS
   const menuItems: MenuItem[] = [
     {
       id: 'rissol-leitao',
@@ -220,11 +216,9 @@ export default function App() {
     };
 
     try {
-      // 1. Grava a reserva no Firebase
       const docRef = await addDoc(collection(db, 'bookings'), bookingData);
       const bookingId = docRef.id;
 
-      // 2. Cria Checkout Session no Stripe via API
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -262,7 +256,6 @@ export default function App() {
     ? menuItems 
     : menuItems.filter(item => item.category === activeCategory);
 
-  // VIEW: SUCCESS
   if (view === 'success') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-neutral-50 flex items-center justify-center px-4">
@@ -294,7 +287,6 @@ export default function App() {
     );
   }
 
-  // VIEW: CANCEL
   if (view === 'cancel') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-neutral-50 flex items-center justify-center px-4">
@@ -326,11 +318,8 @@ export default function App() {
     );
   }
 
-  // VIEW: HOME (default)
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-800 flex flex-col antialiased">
-      
-      {/* Top Banner */}
       <div className="bg-[#1F1916] text-[#F9F6F0] py-2 px-4 text-xs font-semibold flex justify-between items-center z-40">
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
@@ -342,7 +331,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Hero Section */}
       <section className="relative h-[500px] flex items-center justify-center text-center px-4 bg-cover bg-center overflow-hidden" style={{ backgroundImage: "linear-gradient(rgba(10, 8, 6, 0.6), rgba(10, 8, 8, 0.9)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600&auto=format&fit=crop&q=80')" }}>
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-5 relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 border border-amber-400/30 bg-[#251D18]/80 text-amber-300 text-xs tracking-[0.2em] uppercase rounded-full font-semibold">
@@ -359,7 +347,6 @@ export default function App() {
         </div>
       </section>
 
-      {/* Category Filter */}
       <div className="flex justify-center gap-4 mt-12">
         <button onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
           {lang === 'pt' ? 'Tudo' : 'All'}
@@ -372,7 +359,6 @@ export default function App() {
         </button>
       </div>
 
-      {/* Products Grid */}
       <section className="py-12 px-4 md:px-8 max-w-7xl mx-auto w-full flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredItems.map(item => (
@@ -398,7 +384,6 @@ export default function App() {
         </div>
       </section>
 
-      {/* Floating Cart Button */}
       {cart.length > 0 && (
         <button onClick={() => setIsCartOpen(true)} type="button" className="fixed bottom-6 right-6 z-40 bg-amber-600 hover:bg-amber-700 text-white px-5 py-4 rounded-full shadow-2xl flex items-center gap-3 font-semibold">
           <ShoppingBag className="w-5 h-5" />
@@ -407,7 +392,6 @@ export default function App() {
         </button>
       )}
 
-      {/* Sidebar Cart / Checkout */}
       {isCartOpen && (
         <div className="fixed inset-0 bg-neutral-900/60 z-50 flex justify-end backdrop-blur-sm">
           <div className="bg-white w-full max-w-md h-full flex flex-col justify-between shadow-2xl overflow-y-auto p-6">

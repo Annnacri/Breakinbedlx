@@ -1,6 +1,6 @@
 {
   "name": "Breakfast in Bed Lisbon",
-  "description": "Premium breakfast delivery reservation experience for Airbnbs in Lisbon.",
+  "description": "Premium breakfast delivery reservation experience for all in Lisbon.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

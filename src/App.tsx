@@ -116,7 +116,7 @@ const MENU_ITEMS: MenuItem[] = [
 ];
 
 const App = () => {
-  // State
+  // State definitions
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -163,9 +163,9 @@ const App = () => {
 
   // Functions
   const addToCart = (item: MenuItem) => {
-    const existing = cart.find(c => c.menuItem.id === item.id);
+    const existing = cart.find((c: CartItem) => c.menuItem.id === item.id);
     if (existing) {
-      setCart(cart.map(c => c.menuItem.id === item.id ? { ...c, quantity: c.quantity + 1 } : c));
+      setCart(cart.map((c: CartItem) => c.menuItem.id === item.id ? { ...c, quantity: c.quantity + 1 } : c));
     } else {
       setCart([...cart, { menuItem: item, quantity: 1 }]);
     }
@@ -173,19 +173,19 @@ const App = () => {
   };
 
   const updateQuantity = (itemId: string, amount: number) => {
-    const updated = cart.map(c => {
+    const updated = cart.map((c: CartItem) => {
       if (c.menuItem.id === itemId) {
         const newQty = c.quantity + amount;
         return newQty > 0 ? { ...c, quantity: newQty } : null;
       }
       return c;
-    }).filter((c): c is CartItem => c !== null);
+    }).filter((c: CartItem | null): c is CartItem => c !== null);
     
     setCart(updated);
   };
 
   const getCartSubtotal = () => {
-    return cart.reduce((acc, current) => acc + (current.menuItem.price * current.quantity), 0);
+    return cart.reduce((acc: number, current: CartItem) => acc + (current.menuItem.price * current.quantity), 0);
   };
 
   const getCartTotal = () => {
@@ -259,7 +259,7 @@ const App = () => {
 
   const filteredItems = activeCategory === 'all' 
     ? MENU_ITEMS 
-    : MENU_ITEMS.filter(item => item.category === activeCategory);
+    : MENU_ITEMS.filter((item: MenuItem) => item.category === activeCategory);
 
   // Render Views
   if (view === 'success') {
@@ -367,7 +367,7 @@ const App = () => {
 
       <section className="py-12 px-4 md:px-8 max-w-7xl mx-auto w-full flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredItems.map(item => (
+          {filteredItems.map((item: MenuItem) => (
             <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-neutral-200 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
               <div className="relative h-48 bg-neutral-100">
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
@@ -407,7 +407,7 @@ const App = () => {
                 <button type="button" onClick={() => setIsCartOpen(false)}><X className="w-5 h-5" /></button>
               </div>
 
-              {cart.map(item => (
+              {cart.map((item: CartItem) => (
                 <div key={item.menuItem.id} className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl mb-3">
                   <div className="flex-1 pr-2">
                     <h4 className="text-xs font-bold text-neutral-900">{lang === 'pt' ? item.menuItem.title : item.menuItem.titleEn}</h4>
@@ -477,4 +477,3 @@ const App = () => {
 };
 
 export default App;
-// Last update: Tue Jul  7 16:13:14 UTC 2026

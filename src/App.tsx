@@ -1,4 +1,3 @@
-// Version: 1.0.2 - Force Vercel Rebuild
 import { useState, useEffect } from 'react';
 import { 
   ShoppingBag, 
@@ -11,6 +10,7 @@ import {
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
+// Interfaces
 interface MenuItem {
   id: string;
   title: string;
@@ -29,6 +29,7 @@ interface CartItem {
 
 type AppView = 'home' | 'success' | 'cancel';
 
+// Constants
 const DELIVERY_FEE = 3.90;
 
 const MENU_ITEMS: MenuItem[] = [
@@ -114,7 +115,8 @@ const MENU_ITEMS: MenuItem[] = [
   }
 ];
 
-export default function App() {
+const App = () => {
+  // State
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -132,6 +134,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Effects
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
@@ -158,6 +161,7 @@ export default function App() {
     localStorage.setItem('breakinbed_cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Functions
   const addToCart = (item: MenuItem) => {
     const existing = cart.find(c => c.menuItem.id === item.id);
     if (existing) {
@@ -203,7 +207,7 @@ export default function App() {
       deliveryDate,
       deliveryTime,
       deliveryNotes: deliveryNotes || '',
-      items: cart.map(c => ({
+      items: cart.map((c: CartItem) => ({
         id: c.menuItem.id,
         title: lang === 'pt' ? c.menuItem.title : c.menuItem.titleEn,
         quantity: c.quantity,
@@ -225,7 +229,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bookingId,
-          items: cart.map(c => ({
+          items: cart.map((c: CartItem) => ({
             name: lang === 'pt' ? c.menuItem.title : c.menuItem.titleEn,
             price: Math.round(c.menuItem.price * 100),
             quantity: c.quantity
@@ -257,6 +261,7 @@ export default function App() {
     ? MENU_ITEMS 
     : MENU_ITEMS.filter(item => item.category === activeCategory);
 
+  // Render Views
   if (view === 'success') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-neutral-50 flex items-center justify-center px-4">
@@ -469,4 +474,6 @@ export default function App() {
       )}
     </div>
   );
-}
+};
+
+export default App;

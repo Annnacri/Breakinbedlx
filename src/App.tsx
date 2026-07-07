@@ -1,3 +1,4 @@
+// Version: 1.0.2 - Force Vercel Rebuild
 import { useState, useEffect } from 'react';
 import { 
   ShoppingBag, 

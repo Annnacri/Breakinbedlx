@@ -10,7 +10,6 @@ import {
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
-// Interfaces
 interface MenuItem {
   id: string;
   title: string;
@@ -29,7 +28,6 @@ interface CartItem {
 
 type AppView = 'home' | 'success' | 'cancel';
 
-// Constants
 const DELIVERY_FEE = 3.90;
 
 const MENU_ITEMS: MenuItem[] = [
@@ -116,7 +114,6 @@ const MENU_ITEMS: MenuItem[] = [
 ];
 
 const App = () => {
-  // State definitions
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -134,7 +131,6 @@ const App = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Effects
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
@@ -161,7 +157,6 @@ const App = () => {
     localStorage.setItem('breakinbed_cart', JSON.stringify(cart));
   }, [cart]);
 
-  // Functions
   const addToCart = (item: MenuItem) => {
     const existing = cart.find((c: CartItem) => c.menuItem.id === item.id);
     if (existing) {
@@ -261,7 +256,6 @@ const App = () => {
     ? MENU_ITEMS 
     : MENU_ITEMS.filter((item: MenuItem) => item.category === activeCategory);
 
-  // Render Views
   if (view === 'success') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-neutral-50 flex items-center justify-center px-4">

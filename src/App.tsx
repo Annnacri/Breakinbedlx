@@ -10,6 +10,7 @@ import {
 import { db } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
+// Interfaces
 interface MenuItem {
   id: string;
   title: string;
@@ -28,6 +29,7 @@ interface CartItem {
 
 type AppView = 'home' | 'success' | 'cancel';
 
+// Constants
 const DELIVERY_FEE = 3.90;
 
 const MENU_ITEMS: MenuItem[] = [
@@ -114,6 +116,7 @@ const MENU_ITEMS: MenuItem[] = [
 ];
 
 const App = () => {
+  // Estados necessários
   const [lang, setLang] = useState<'pt' | 'en'>('pt');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -131,6 +134,7 @@ const App = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Efeitos para persistência e redirecionamento
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
@@ -157,6 +161,7 @@ const App = () => {
     localStorage.setItem('breakinbed_cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Funções do carrinho
   const addToCart = (item: MenuItem) => {
     const existing = cart.find((c: CartItem) => c.menuItem.id === item.id);
     if (existing) {
@@ -216,9 +221,11 @@ const App = () => {
     };
 
     try {
+      // Gravar no Firebase
       const docRef = await addDoc(collection(db, 'bookings'), bookingData);
       const bookingId = docRef.id;
 
+      // Criar Checkout no Stripe
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -235,17 +242,13 @@ const App = () => {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao criar sessão de pagamento');
-      }
+      if (!response.ok) throw new Error('Erro na API');
 
       const { url } = await response.json();
-      if (url) {
-        window.location.href = url;
-      }
+      if (url) window.location.href = url;
       
     } catch (err) {
-      console.error('Erro no checkout:', err);
+      console.error(err);
       setSubmitError(lang === 'pt' ? 'Erro ao conectar. Tente novamente.' : 'Connection error. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -256,31 +259,16 @@ const App = () => {
     ? MENU_ITEMS 
     : MENU_ITEMS.filter((item: MenuItem) => item.category === activeCategory);
 
+  // Renderização das Vistas
   if (view === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-neutral-50 flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-              <Check className="w-10 h-10 text-green-600" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-            {lang === 'pt' ? 'Obrigado!' : 'Thank You!'}
-          </h1>
-          <p className="text-neutral-600 mb-6">
-            {lang === 'pt' 
-              ? 'O teu pagamento foi confirmado. Receberás um email com os detalhes da entrega.' 
-              : 'Your payment has been confirmed. You will receive an email with delivery details.'}
-          </p>
-          <button 
-            onClick={() => {
-              setView('home');
-              window.history.replaceState({}, '', '/');
-            }}
-            className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-colors"
-          >
-            {lang === 'pt' ? 'Voltar à Loja' : 'Back to Shop'}
+      <div className="min-h-screen bg-amber-50 flex items-center justify-center px-4">
+        <div className="text-center">
+          <Check className="w-16 h-16 text-green-600 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold mb-2">{lang === 'pt' ? 'Obrigado!' : 'Thank You!'}</h1>
+          <p className="mb-6">{lang === 'pt' ? 'Pagamento confirmado.' : 'Payment confirmed.'}</p>
+          <button onClick={() => setView('home')} className="px-6 py-2 bg-amber-600 text-white rounded-xl">
+            {lang === 'pt' ? 'Voltar' : 'Back'}
           </button>
         </div>
       </div>
@@ -289,29 +277,12 @@ const App = () => {
 
   if (view === 'cancel') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-neutral-50 flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
-              <X className="w-10 h-10 text-red-600" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-            {lang === 'pt' ? 'Pagamento Cancelado' : 'Payment Canceled'}
-          </h1>
-          <p className="text-neutral-600 mb-6">
-            {lang === 'pt' 
-              ? 'O teu pagamento foi cancelado. Podes tentar novamente.' 
-              : 'Your payment was canceled. You can try again.'}
-          </p>
-          <button 
-            onClick={() => {
-              setView('home');
-              window.history.replaceState({}, '', '/');
-            }}
-            className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-colors"
-          >
-            {lang === 'pt' ? 'Voltar ao Carrinho' : 'Back to Cart'}
+      <div className="min-h-screen bg-red-50 flex items-center justify-center px-4">
+        <div className="text-center">
+          <X className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold mb-2">{lang === 'pt' ? 'Cancelado' : 'Canceled'}</h1>
+          <button onClick={() => setView('home')} className="px-6 py-2 bg-amber-600 text-white rounded-xl">
+            {lang === 'pt' ? 'Tentar novamente' : 'Try again'}
           </button>
         </div>
       </div>
@@ -319,63 +290,40 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-800 flex flex-col antialiased">
-      <div className="bg-[#1F1916] text-[#F9F6F0] py-2 px-4 text-xs font-semibold flex justify-between items-center z-40">
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-          <span>☀️ {lang === 'pt' ? 'Entrega garantida no seu Airbnb em Lisboa' : 'Guaranteed delivery to your Airbnb in Lisbon'}</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <button type="button" onClick={() => setLang('pt')} className={`transition-colors py-0.5 px-2 rounded-md ${lang === 'pt' ? 'bg-amber-600 text-white' : 'hover:text-amber-300'}`}>Português</button>
-          <button type="button" onClick={() => setLang('en')} className={`transition-colors py-0.5 px-2 rounded-md ${lang === 'en' ? 'bg-amber-600 text-white' : 'hover:text-amber-300'}`}>English</button>
+    <div className="min-h-screen bg-neutral-50 flex flex-col antialiased">
+      {/* Header com Idioma */}
+      <div className="bg-[#1F1916] text-[#F9F6F0] py-2 px-4 text-xs flex justify-between items-center z-40">
+        <span>☀️ {lang === 'pt' ? 'Entrega em Lisboa' : 'Lisbon Delivery'}</span>
+        <div className="flex gap-4">
+          <button onClick={() => setLang('pt')} className={lang === 'pt' ? 'text-amber-400 font-bold' : ''}>PT</button>
+          <button onClick={() => setLang('en')} className={lang === 'en' ? 'text-amber-400 font-bold' : ''}>EN</button>
         </div>
       </div>
 
-      <section className="relative h-[500px] flex items-center justify-center text-center px-4 bg-cover bg-center overflow-hidden" style={{ backgroundImage: "linear-gradient(rgba(10, 8, 6, 0.6), rgba(10, 8, 8, 0.9)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600&auto=format&fit=crop&q=80')" }}>
-        <div className="max-w-4xl mx-auto flex flex-col items-center gap-5 relative">
-          <div className="inline-flex items-center gap-2 px-4 py-2 border border-amber-400/30 bg-[#251D18]/80 text-amber-300 text-xs tracking-[0.2em] uppercase rounded-full font-semibold">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Lisbon Local Flavors</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-[#F9F6F0] tracking-tight font-serif">
-            Breakfast in Bed
-            <span className="block mt-1 text-amber-500 font-serif italic text-2xl md:text-5xl font-normal tracking-wide">Lisbon Experience</span>
-          </h1>
-          <p className="text-sm md:text-lg text-neutral-300 max-w-2xl font-light">
-            {lang === 'pt' ? 'Pequenos-almoços e petiscos tradicionais entregues diretamente na porta do teu alojamento.' : 'Traditional breakfasts and savory snacks delivered right to your accommodation doorstep.'}
-          </p>
-        </div>
+      {/* Hero */}
+      <section className="h-[400px] flex items-center justify-center text-center bg-cover bg-center" style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1600')" }}>
+        <h1 className="text-4xl md:text-6xl font-bold text-white font-serif">Breakfast in Bed</h1>
       </section>
 
-      <div className="flex justify-center gap-4 mt-12">
-        <button onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
-          {lang === 'pt' ? 'Tudo' : 'All'}
-        </button>
-        <button onClick={() => setActiveCategory('menus')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'menus' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
-          Menus
-        </button>
-        <button onClick={() => setActiveCategory('snacks')} className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all ${activeCategory === 'snacks' ? 'bg-amber-600 text-white' : 'bg-white border border-neutral-200 text-neutral-600'}`}>
-          {lang === 'pt' ? 'Petiscos / Salgados' : 'Savory Snacks'}
-        </button>
+      {/* Categorias */}
+      <div className="flex justify-center gap-4 my-8">
+        <button onClick={() => setActiveCategory('all')} className={`px-4 py-2 rounded-xl text-xs font-bold ${activeCategory === 'all' ? 'bg-amber-600 text-white' : 'bg-white border'}`}>TUDO</button>
+        <button onClick={() => setActiveCategory('menus')} className={`px-4 py-2 rounded-xl text-xs font-bold ${activeCategory === 'menus' ? 'bg-amber-600 text-white' : 'bg-white border'}`}>MENUS</button>
+        <button onClick={() => setActiveCategory('snacks')} className={`px-4 py-2 rounded-xl text-xs font-bold ${activeCategory === 'snacks' ? 'bg-amber-600 text-white' : 'bg-white border'}`}>SNACKS</button>
       </div>
 
-      <section className="py-12 px-4 md:px-8 max-w-7xl mx-auto w-full flex-1">
+      {/* Grelha de Produtos */}
+      <section className="py-8 px-4 max-w-7xl mx-auto w-full flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredItems.map((item: MenuItem) => (
-            <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-neutral-200 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
-              <div className="relative h-48 bg-neutral-100">
-                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-              </div>
-              <div className="p-5 flex-1 flex flex-col justify-between gap-4">
+            <div key={item.id} className="bg-white rounded-2xl overflow-hidden border flex flex-col shadow-sm">
+              <img src={item.image} alt={item.title} className="h-48 w-full object-cover" />
+              <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="text-base font-bold text-neutral-900 font-serif">{lang === 'pt' ? item.title : item.titleEn}</h3>
-                    <span className="text-sm font-black text-amber-700 whitespace-nowrap">{item.price.toFixed(2)}€</span>
-                  </div>
-                  <p className="text-xs text-neutral-500 line-clamp-2">{lang === 'pt' ? item.description : item.descriptionEn}</p>
+                  <h3 className="font-bold text-lg">{lang === 'pt' ? item.title : item.titleEn}</h3>
+                  <p className="text-sm text-neutral-500 mb-2">{item.price.toFixed(2)}€</p>
                 </div>
-                <button onClick={() => addToCart(item)} type="button" className="w-full py-2.5 bg-[#1F1916] hover:bg-amber-700 text-white text-xs uppercase font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
-                  <ShoppingBag className="w-3.5 h-3.5" />
+                <button onClick={() => addToCart(item)} className="w-full py-2 bg-[#1F1916] text-white rounded-xl font-bold uppercase text-xs">
                   {lang === 'pt' ? 'Adicionar' : 'Add to Order'}
                 </button>
               </div>
@@ -384,82 +332,62 @@ const App = () => {
         </div>
       </section>
 
+      {/* Botão Flutuante do Carrinho */}
       {cart.length > 0 && (
-        <button onClick={() => setIsCartOpen(true)} type="button" className="fixed bottom-6 right-6 z-40 bg-amber-600 hover:bg-amber-700 text-white px-5 py-4 rounded-full shadow-2xl flex items-center gap-3 font-semibold">
+        <button onClick={() => setIsCartOpen(true)} className="fixed bottom-6 right-6 z-40 bg-amber-600 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 font-bold">
           <ShoppingBag className="w-5 h-5" />
-          <span className="text-sm">{lang === 'pt' ? 'Completar Pedido' : 'Checkout'}</span>
-          <span className="text-sm font-bold bg-[#1F1916]/20 px-2.5 py-0.5 rounded-lg">{getCartTotal().toFixed(2)}€</span>
+          <span>{getCartTotal().toFixed(2)}€</span>
         </button>
       )}
 
+      {/* Drawer do Carrinho */}
       {isCartOpen && (
-        <div className="fixed inset-0 bg-neutral-900/60 z-50 flex justify-end backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md h-full flex flex-col justify-between shadow-2xl overflow-y-auto p-6">
-            <div>
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold">{lang === 'pt' ? 'O Teu Pedido' : 'My Order'}</h3>
-                <button type="button" onClick={() => setIsCartOpen(false)}><X className="w-5 h-5" /></button>
-              </div>
+        <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
+          <div className="bg-white w-full max-w-md h-full p-6 overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">{lang === 'pt' ? 'O Teu Pedido' : 'Your Order'}</h3>
+              <button onClick={() => setIsCartOpen(false)}><X /></button>
+            </div>
 
-              {cart.map((item: CartItem) => (
-                <div key={item.menuItem.id} className="flex justify-between items-center bg-neutral-50 p-3 rounded-xl mb-3">
-                  <div className="flex-1 pr-2">
-                    <h4 className="text-xs font-bold text-neutral-900">{lang === 'pt' ? item.menuItem.title : item.menuItem.titleEn}</h4>
-                    <span className="text-xs text-amber-700 font-bold">{(item.menuItem.price * item.quantity).toFixed(2)}€</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button type="button" className="p-1 hover:text-amber-600" onClick={() => updateQuantity(item.menuItem.id, -1)}><Minus className="w-3.5 h-3.5" /></button>
-                    <span className="w-4 text-center text-xs font-bold">{item.quantity}</span>
-                    <button type="button" className="p-1 hover:text-amber-600" onClick={() => updateQuantity(item.menuItem.id, 1)}><Plus className="w-3.5 h-3.5" /></button>
-                  </div>
+            {cart.map((item: CartItem) => (
+              <div key={item.menuItem.id} className="flex justify-between items-center mb-4 p-3 bg-neutral-50 rounded-xl">
+                <div>
+                  <p className="font-bold text-sm">{lang === 'pt' ? item.menuItem.title : item.menuItem.titleEn}</p>
+                  <p className="text-xs text-amber-700">{item.menuItem.price.toFixed(2)}€</p>
                 </div>
-              ))}
-              
-              <div className="text-sm text-neutral-600 mt-4 mb-2 border-t pt-3">
-                <div className="flex justify-between mb-1">
-                  <span>{lang === 'pt' ? 'Subtotal' : 'Subtotal'}</span>
-                  <span>{getCartSubtotal().toFixed(2)}€</span>
-                </div>
-                <div className="flex justify-between text-amber-700 font-bold">
-                  <span>{lang === 'pt' ? 'Taxa de Entrega' : 'Delivery Fee'}</span>
-                  <span>{DELIVERY_FEE.toFixed(2)}€</span>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => updateQuantity(item.menuItem.id, -1)} className="p-1"><Minus size={14}/></button>
+                  <span className="font-bold">{item.quantity}</span>
+                  <button onClick={() => updateQuantity(item.menuItem.id, 1)} className="p-1"><Plus size={14}/></button>
                 </div>
               </div>
+            ))}
 
-              <div className="text-right font-black text-lg text-neutral-900 mb-6 border-t pt-3">
-                Total: <span className="text-amber-700">{getCartTotal().toFixed(2)}€</span>
+            <div className="border-t pt-4 mt-4">
+              <div className="flex justify-between font-bold text-lg mb-6">
+                <span>Total:</span>
+                <span className="text-amber-700">{getCartTotal().toFixed(2)}€</span>
               </div>
 
-              <form onSubmit={handleCheckoutSubmit} className="flex flex-col gap-3.5">
-                <div className="text-xs font-bold uppercase text-neutral-400 tracking-wider mb-1">{lang === 'pt' ? 'Dados de Entrega' : 'Delivery Details'}</div>
-                <input type="text" required placeholder={lang === 'pt' ? 'Teu Nome' : 'Your Name'} value={clientName} onChange={(e) => setClientName(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
-                <input type="email" required placeholder="Email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
-                <input type="text" required placeholder={lang === 'pt' ? 'Telefone / WhatsApp' : 'Phone / WhatsApp'} value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
-                <input type="text" required placeholder={lang === 'pt' ? 'Morada Completa do Airbnb' : 'Full Airbnb Address'} value={airbnbAddress} onChange={(e) => setAirbnbAddress(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full focus:outline-amber-600" />
-                
+              <form onSubmit={handleCheckoutSubmit} className="flex flex-col gap-3">
+                <input required placeholder="Nome" value={clientName} onChange={e => setClientName(e.target.value)} className="border p-3 rounded-xl text-sm" />
+                <input required type="email" placeholder="Email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className="border p-3 rounded-xl text-sm" />
+                <input required placeholder="Telefone" value={clientPhone} onChange={e => setClientPhone(e.target.value)} className="border p-3 rounded-xl text-sm" />
+                <input required placeholder="Morada Airbnb" value={airbnbAddress} onChange={e => setAirbnbAddress(e.target.value)} className="border p-3 rounded-xl text-sm" />
                 <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] uppercase text-neutral-400 font-bold mb-1">{lang === 'pt' ? 'Data' : 'Date'}</label>
-                    <input type="date" required value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} className="border p-2 rounded-xl text-xs w-full focus:outline-amber-600" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase text-neutral-400 font-bold mb-1">{lang === 'pt' ? 'Horário' : 'Time'}</label>
-                    <select value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} className="border p-2 rounded-xl text-xs w-full bg-white focus:outline-amber-600">
-                      <option value="08:00 - 08:30">08:00 - 08:30</option>
-                      <option value="08:30 - 09:00">08:30 - 09:00</option>
-                      <option value="09:00 - 09:30">09:00 - 09:30</option>
-                      <option value="09:30 - 10:00">09:30 - 10:00</option>
-                      <option value="10:00 - 10:30">10:00 - 10:30</option>
-                    </select>
-                  </div>
+                  <input required type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} className="border p-3 rounded-xl text-sm" />
+                  <select value={deliveryTime} onChange={e => setDeliveryTime(e.target.value)} className="border p-3 rounded-xl text-sm bg-white">
+                    <option value="08:00 - 08:30">08:00 - 08:30</option>
+                    <option value="08:30 - 09:00">08:30 - 09:00</option>
+                    <option value="09:00 - 09:30">09:00 - 09:30</option>
+                  </select>
                 </div>
-
-                <textarea placeholder={lang === 'pt' ? 'Notas adicionais (ex: código da porta, alergias...)' : 'Additional notes (e.g. door code, allergies...)'} value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} className="border p-2.5 rounded-xl text-xs w-full h-16 resize-none focus:outline-amber-600" />
+                <textarea placeholder="Notas (opcional)" value={deliveryNotes} onChange={e => setDeliveryNotes(e.target.value)} className="border p-3 rounded-xl text-sm h-20 resize-none" />
                 
                 {submitError && <p className="text-red-500 text-xs font-bold">{submitError}</p>}
-
-                <button type="submit" disabled={isSubmitting} className="w-full mt-2 py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-neutral-400 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-colors shadow-md">
-                  {isSubmitting ? '...' : (lang === 'pt' ? 'Ir para Pagamento Seguro' : 'Proceed to Secure Payment')}
+                
+                <button type="submit" disabled={isSubmitting} className="w-full py-4 bg-amber-600 text-white font-bold rounded-xl uppercase tracking-wider">
+                  {isSubmitting ? 'A processar...' : 'Pagar Agora'}
                 </button>
               </form>
             </div>
